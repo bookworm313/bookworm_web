@@ -1,0 +1,51 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+}
+
+#search-results {
+    width: 50%;
+    min-width: 300px;
+    margin: 1rem auto;
+}
+
+.book-container {
+    padding: 1rem;
+    margin: 1rem;
+    background-color: rgb(247, 247, 247);
+
+    display: flex;
+    align-items: flex-start;
+}
+
+.book-cover {
+    width: 80px;
+    margin-right: 1rem;
+}
+
+.book-work-title {
+    font-style: italic;
+    font-size: 16px;
+    display: none;
+}
+
+.book-edition-title {
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.book-about {
+    font-size: 14px;
+    margin-top: 6px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* number of lines to show */
+    line-clamp: 3; 
+    -webkit-box-orient: vertical;
+}
