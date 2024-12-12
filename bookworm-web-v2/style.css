@@ -29,7 +29,13 @@ nav {
     margin-right: 1rem;
 }
 
-.book-title {
+.book-work-title {
+    font-style: italic;
+    font-size: 16px;
+    display: none;
+}
+
+.book-edition-title {
     font-weight: 600;
     font-size: 20px;
 }
@@ -39,7 +45,7 @@ nav {
     margin-top: 6px;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* number of lines to show */
-    line-clamp: 2; 
+    -webkit-line-clamp: 3; /* number of lines to show */
+    line-clamp: 3; 
     -webkit-box-orient: vertical;
 }
