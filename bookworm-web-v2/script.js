@@ -6,7 +6,7 @@ const search_results = document.getElementById("search-results");
 let search_value;
 
 function displayResult(docs, docs_size, num_found) {
-    console.log("docs", docs);
+    
     for (let i = 0; i < docs_size; i++) {
         
         const works = docs[i]; // Skup svih mogućih izdanja iste knjige
@@ -14,8 +14,6 @@ function displayResult(docs, docs_size, num_found) {
 
         if (!edition)
             edition = works;
-
-        console.log(works, edition)
         
         // Odredi URI korice
         let key = "id";
