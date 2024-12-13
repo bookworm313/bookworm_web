@@ -29,13 +29,7 @@ nav {
     margin-right: 1rem;
 }
 
-.book-work-title {
-    font-style: italic;
-    font-size: 16px;
-    display: none;
-}
-
-.book-edition-title {
+.book-title {
     font-weight: 600;
     font-size: 20px;
 }
