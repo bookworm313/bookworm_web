@@ -4,15 +4,31 @@
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  transition: all 0.3s ease-in-out;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--text-color);
+  /* background-color: #242424; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --text-color: #2a2a2a;
+  --primary: #ffe78a;
+  --primary_hover: #f0d878;
+  --primary_active: #f4c760;
+  --secondary: #ff7a7a;
+  --secondary_hover: #ff5c5c;
+  --secondary_active: #ff4040;
+  --bg: #fff6d3;
+  --red: #ea2323;
+  --gold: rgb(180, 153, 0);
+  --input_border: #ccc;
+  --input_color: #fff;
+  --input_hover: #f5f5f5;
+  --input_active: #ccc;
 }
 
 * {
@@ -20,4 +36,24 @@
   padding: 0;
   box-sizing: border-box;
   font-size: 16px;
+}
+
+body {
+  background-color: var(--bg);
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+
+input {
+  border: 1px solid white;
+  background-color: var(--input_color) !important;
+}
+
+input:hover {
+  border: 1px solid var(--input_border) !important;
+  background-color: var(--input_hover) !important;
 }
