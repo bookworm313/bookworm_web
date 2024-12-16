@@ -1,8 +1,7 @@
 <template>
     <div class="book">
-        <div class="cover">
-            <img :src="props.coverURI" class="image" alt="img">
-        </div>
+        <img v-if="props.coverURI" :src="props.coverURI" class="image" alt="img">
+        <Skeleton v-else width="150px" height="200px"></Skeleton>
         <div class="book-info">
             <h2>{{ props.title }}</h2>
             <h3>{{ props.authorNames.join(", ") }}</h3>
@@ -13,16 +12,26 @@
             </div>
         </div>
         <div class="options">
-            <MultiSelect
-                v-model="selectedLists"
-                @before-hide="updateLists()"
-                :options="userStore.lists"
-                optionLabel="name"
-                placeholder="Add to lists"
-                :disabled="storing.value ? true : false" />
+            <MultiSelect v-model="selectedLists" @before-hide="updateLists()" :options="userStore.lists"
+                optionLabel="name" placeholder="Add to lists" :disabled="storing.value ? true : false" />
         </div>
     </div>
 </template>
+
+<!-- <template>
+    <div class="book">
+        <img :src="props.coverURI" class="image" alt="img">
+        <h2>{{ props.name }}</h2>
+        <p class="description">
+            {{ props.description }}
+        </p>
+        <font-awesome-icon icon="trash" class="icon trash" size="lg" />
+        <div class="review">
+            <span>{{ props.review }} </span>
+            <font-awesome-icon icon="star" class="icon star" />
+        </div>
+    </div>
+</template> -->
 
 <script setup>
 
@@ -41,7 +50,8 @@ const cond = computed(() => {
 onBeforeMount(() => {
     selectedLists.value = userStore.lists.filter((list) => {
         //console.log(list + " includes " + props.olid + ": " + list.books_olid.split(",").includes(props.olid))
-        return list.books_olid.split(",").includes(props.olid)});
+        return list.books_olid.split(",").includes(props.olid)
+    });
     //console.log(userStore.lists[0])
     console.log(selectedLists.value)
 })
@@ -117,6 +127,8 @@ const props = defineProps({
     title: String,
     publicationYear: Number,
 })
+
+// console.log(props.coverURI)
 
 </script>
 

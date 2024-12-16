@@ -4,11 +4,11 @@
             <Sidebar />
             <!-- <div class="vertical-hr" /> -->
         </div>
-        <div class="grid-item navbar" >
+        <div class="grid-item navbar">
             <Navbar />
             <!-- NAVBAR -->
         </div>
-        <div class="grid-item view" >
+        <div class="grid-item view">
             <router-view />
             <!-- VIEW -->
         </div>
@@ -59,18 +59,25 @@ onBeforeMount(async () => {
 
 <style scoped>
 main {
-    height: 100dvh;
+    position: relative;
+    min-height: 100dvh;
     width: 100%;
     display: grid;
     grid-template-columns: 250px 1fr 150px;
     grid-template-rows: 80px 1fr;
+    overflow: hidden;
 }
 
 .sidebar {
     display: flex;
-    width: 100%;
+    width: 250px;
     grid-column: 1;
     grid-row: 1 / 3;
+
+    position: fixed;
+    top: 0;
+    height: 100%;
+    overflow-y: auto;
 }
 
 .vertical-hr {
@@ -82,10 +89,17 @@ main {
 
 .navbar {
     grid-column: 2 / 4;
+    width: 100%;
+    /* position: fixed;
+    right: 0;
+    top: 0;
+    z-index: 10; */
+    /* Ensure it stays above other content */
 }
 
 .view {
-    overflow: hidden;
+    overflow-y: auto;
+    /* Enable scrolling within this section */
     grid-column: 2;
     grid-row: 2;
 

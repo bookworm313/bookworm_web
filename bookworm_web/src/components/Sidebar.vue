@@ -27,14 +27,18 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { getLists } from '../../services/books';
 
 const route = useRoute();
 const router = useRouter();
 
+const lists = ref();
+
 const sections = ref([
     { label: 'Homepage', to: '/', icon: 'house', isActive: false },
+    { label: 'Search', to: '/search', icon: 'search', isActive: false },
     {
         label: 'Lists',
         icon: 'book',
@@ -60,7 +64,10 @@ const isActiveRoute = (to) => {
     return currentPath === path && (!hash || currentHash === `#${hash}`);
 };
 
-
+onMounted(async () => {
+    lists.value = await getLists();
+    console.log("Liste: ", lists.value);
+});
 
 const toggleSection = (section) => {
     if (section.children) {

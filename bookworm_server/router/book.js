@@ -32,7 +32,7 @@ router.post('/', async (req, res) => {
         res.status(201).json({ message: 'Lists updated successfully', test: books_olid, list: result.rows[0] });
     } catch (err) {
         res.status(500).json({ error: err.message });
-    }    
+    }
 });
 
 module.exports = router;
