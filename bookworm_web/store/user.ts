@@ -2,11 +2,18 @@ import { defineStore } from "pinia";
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        name: 'John',
-        surname: 'Smith',
-        age: 30,
-        email: 'john.smith@example.com',
-        isLoggedIn: false,
+        id: 0,
+        username: '',
+        email: '',
+        password: '',
+        visible: true,
+        lists: [{
+            id: 0,
+            name: '',
+            is_default: true,
+            visible: true,
+            books_olid: '',
+        }],
     }),
     actions: {
         login() {
@@ -20,6 +27,6 @@ export const useUserStore = defineStore('user', {
         }
     },
     getters: {
-        fullName: (state) => `${state.name} ${state.surname}`,
+        //fullName: (state) => `${state.name} ${state.surname}`,
     },
 });

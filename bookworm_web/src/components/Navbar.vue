@@ -12,26 +12,27 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
 import { fetchBooks } from '../utils/openlibrary'
 import { useAnswerStore } from '../../store/index'
 
 const answerStore = useAnswerStore();
 
-//const emit = defineEmits(['receivedBooks'])
+const router = useRouter();
 
 const search = ref(null);
-
-/*const props = defineProps({
-    propResults: Object,
-})
-let results = props.propResults;*/
+const searchSection = ref({
+    label: 'Search', to: '/search', icon: '', isActive: false,
+});
 
 const initiateQuery = async () => {
-    //results = await fetchBooks(search.value, "eng", 10, 1)
-    //console.log(results)
-    //emit('receivedBooks', results);
-    answerStore.data = await fetchBooks(search.value, "eng", 10, 1);
-    console.log("fetch complete", answerStore.data);
+    if (search.value.trim().length > 0) {
+        answerStore.$reset();
+        router.push(searchSection.value.to);
+        answerStore.data = await fetchBooks(search.value, "eng", 10, 1);
+        console.log("fetch complete", answerStore.data);
+    }
 }
 
 </script>

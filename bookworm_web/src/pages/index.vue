@@ -5,11 +5,11 @@
             <!-- <div class="vertical-hr" /> -->
         </div>
         <div class="grid-item navbar" >
-            <Navbar :prop-results="books" @received-books="displayBooks" />
+            <Navbar />
             <!-- NAVBAR -->
         </div>
         <div class="grid-item view" >
-            <router-view :prop-results="books" />
+            <router-view />
             <!-- VIEW -->
         </div>
         <div class="grid-item right">
@@ -21,6 +21,39 @@
 <script setup>
 
 import Sidebar from '../components/Sidebar.vue';
+import { useUserStore } from '../../store/user';
+
+import { onBeforeMount, ref } from 'vue';
+import axios from 'axios';
+
+const userStore = useUserStore();
+
+onBeforeMount(async () => {
+
+    // Get default user
+    try {
+        const response = await axios.get('http://localhost:6543/user');
+        console.log(response.data);
+        const defaultUser = response.data[0];
+        userStore.id = defaultUser.id;
+        userStore.username = defaultUser.username;
+        userStore.email = defaultUser.email;
+        userStore.password = defaultUser.password;
+        userStore.visible = defaultUser.visible;
+        console.log("Logged in as: ", userStore.$state)
+    } catch (error) {
+        console.log("Fetch user error", error);
+    }
+
+    // Get current user lists
+    try {
+        const response = await axios.get('http://localhost:6543/book/lists');
+        userStore.lists = response.data.filter((list) => list.id_user === userStore.id); // Filter out other users' lists
+        console.log("Fetched user's lists: ", userStore.lists);
+    } catch (error) {
+        console.log("Fetch user lists error", error);
+    }
+});
 
 </script>
 

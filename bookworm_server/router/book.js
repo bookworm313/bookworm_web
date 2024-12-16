@@ -23,17 +23,13 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    const { list_id, book_olid, selected } = req.body;
+    const { list_id, books_olid } = req.body;
 
     const pool = req.pool;
 
-    const query = selected
-        ? 'INSERT INTO "ListBook" (id_list, olid_book) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING *'
-        : 'DELETE FROM "ListBook" WHERE id_list = $1 AND olid_book = $2 RETURNING *';
-
     try {
-        const result = await pool.query(query, [list_id, book_olid]);
-        res.status(201).json({ message: selected ? 'Book added to list successfully' : 'Book removed from list successfully', query: query, list: result.rows[0] });
+        const result = await pool.query(`UPDATE "List" SET books_olid = '${books_olid}' WHERE id = ${list_id} RETURNING *`);
+        res.status(201).json({ message: 'Lists updated successfully', test: books_olid, list: result.rows[0] });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }    
