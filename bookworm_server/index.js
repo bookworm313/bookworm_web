@@ -25,8 +25,6 @@ const pool = new Pool({
     port: process.env.PORT,
 });
 
-// console.log(process.env.HOST, ' | ', process.env.DATABASE, ' | ', process.env.USERNAME, ' | ', process.env.PASSWORD, ' | ', process.env.PORT);
-
 // Middleware to attach pool to request
 app.use((req, res, next) => {
     req.pool = pool;
