@@ -4,12 +4,12 @@
             <Sidebar />
             <!-- <div class="vertical-hr" /> -->
         </div>
-        <div class="grid-item navbar">
-            <Navbar />
+        <div class="grid-item navbar" >
+            <Navbar :prop-results="books" @received-books="displayBooks" />
             <!-- NAVBAR -->
         </div>
-        <div class="grid-item view">
-            <router-view />
+        <div class="grid-item view" >
+            <router-view :prop-results="books" />
             <!-- VIEW -->
         </div>
         <div class="grid-item right">

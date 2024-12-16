@@ -7,3 +7,15 @@ import { defineStore } from 'pinia'
 export const useDashboardStore = defineStore('dashboard', {
 
 })
+
+export const useAnswerStore = defineStore('answer', {
+    state: () => ({
+        data: {
+            query: "",
+            start: 0,
+            retrieved_count: 0,
+            total_count: 0,
+            books: [],
+        },
+    }),
+})

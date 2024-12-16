@@ -2,7 +2,7 @@
     <section>
         <IconField>
             <InputIcon class="pi pi-search" />
-            <InputText v-model="search" placeholder="Search books, authors, etc." />
+            <InputText @keydown.enter="initiateQuery" v-model="search" placeholder="Search books, authors, etc." />
         </IconField>
         <div class="icons">
             <font-awesome-icon class="icon" icon="user-gear" size="lg" />
@@ -12,8 +12,28 @@
 
 <script setup>
 import { ref } from 'vue';
+import { fetchBooks } from '../utils/openlibrary'
+import { useAnswerStore } from '../../store/index'
 
-const search = ref(null)
+const answerStore = useAnswerStore();
+
+//const emit = defineEmits(['receivedBooks'])
+
+const search = ref(null);
+
+/*const props = defineProps({
+    propResults: Object,
+})
+let results = props.propResults;*/
+
+const initiateQuery = async () => {
+    //results = await fetchBooks(search.value, "eng", 10, 1)
+    //console.log(results)
+    //emit('receivedBooks', results);
+    answerStore.data = await fetchBooks(search.value, "eng", 10, 1);
+    console.log("fetch complete", answerStore.data);
+}
+
 </script>
 
 <style scoped>
