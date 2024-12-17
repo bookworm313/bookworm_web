@@ -1,9 +1,10 @@
 import axios from "axios";
 import { baseUrl } from "./variables";
 
-export const getLists = async () => {
+export const getLists = async (id) => {
     try {
-        const { data, status } = await axios.get(`${baseUrl}/book/lists`);
+        const url = id ? `${baseUrl}/book/lists/${id}` : `${baseUrl}/book/lists`;
+        const { data, status } = await axios.get(url);
         console.log(data);
 
         if (status == 200)

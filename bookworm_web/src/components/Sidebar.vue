@@ -27,14 +27,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getLists } from '../../services/books';
+import { useUserStore } from '../../store/user';
 
+const userStore = useUserStore()
 const route = useRoute();
 const router = useRouter();
 
-const lists = ref();
+const lists = computed(() => userStore.lists);
 
 const sections = ref([
     { label: 'Homepage', to: '/', icon: 'house', isActive: false },
@@ -44,14 +46,51 @@ const sections = ref([
         icon: 'book',
         isActive: false,
         expanded: true,
-        children: [
-            { label: 'Favorites', to: '/lists#favorites', icon: 'star', isActive: false },
-            { label: 'Want to read', to: '/lists#wanted', icon: 'book-bookmark', isActive: false },
-            { label: 'Done reading', to: '/lists#done', icon: 'book-open', isActive: false },
-        ],
+        children: [],
     },
     { label: 'Random', to: '/random', icon: 'shuffle', isActive: false },
 ]);
+
+function updateListsInSections() {
+    // Map the lists to children structure
+    const formattedChildren = lists.value.map((list) => {
+        const formattedLabel = list.name.toLowerCase().replace(/\s+/g, '_'); // Convert label to lowercase and replace spaces with underscores
+        let icon;
+
+        // Assign icon based on list name
+        switch (formattedLabel) {
+            case 'favorites':
+                icon = 'star';
+                break;
+            case 'want_to_read':
+                icon = 'book-bookmark';
+                break;
+            case 'done_reading':
+                icon = 'book-open';
+                break;
+            default:
+                icon = 'bookmark'; // Default icon for other lists
+        }
+
+        return {
+            id: list.id,
+            id_user: list.id_user,
+            is_default: list.is_default,
+            visibility: list.visible,
+            label: list.name,
+            to: `/lists#${formattedLabel}`,
+            icon: icon,
+            isActive: false
+        };
+    });
+
+    // Find the Lists section and update its children
+    const listsSection = sections.value.find((section) => section.label === 'Lists');
+    if (listsSection) {
+        listsSection.children = formattedChildren;
+    }
+}
+
 
 const isActiveRoute = (to) => {
     if (typeof to !== 'string' || !to.includes('#')) {
@@ -64,8 +103,12 @@ const isActiveRoute = (to) => {
     return currentPath === path && (!hash || currentHash === `#${hash}`);
 };
 
+watch(lists, () => {
+    updateListsInSections();
+    console.log(sections.value)
+}, { immediate: true });
+
 onMounted(async () => {
-    lists.value = await getLists();
     console.log("Liste: ", lists.value);
 });
 

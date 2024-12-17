@@ -11,5 +11,6 @@ export const useDashboardStore = defineStore('dashboard', {
 export const useAnswerStore = defineStore('answer', {
     state: () => ({
         data: {},
+        loading: false
     }),
 })

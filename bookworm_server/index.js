@@ -10,6 +10,7 @@ const bookRouter = require('./router/book')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const server_port = 8080;
 
 // Middleware
 app.use(helmet());
@@ -23,6 +24,8 @@ const pool = new Pool({
     user: 'postgres.zknowujwlgwpoptlzdyx',
     password: process.env.PASSWORD,
     port: process.env.PORT,
+    max: 10,
+    idleTimeoutMillis: 30000, // 30 sekundi
 });
 
 // Middleware to attach pool to request
@@ -40,6 +43,12 @@ pool.connect((err, client, release) => {
     }
 });
 
+pool.on('error', (err) => {
+    console.error('Unexpected error on idle client', err);
+    process.exit(-1); // Opcionalno, izlaz iz aplikacije
+});
+
+
 app.get('/', async (req, res) => {
     res.send('Server uspješno postavljen.');
 });
@@ -48,6 +57,6 @@ app.use('/user', userRouter);
 app.use('/book', bookRouter);
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.listen(server_port, () => {
+    console.log(`Server is running on http://localhost:${server_port}`);
 });

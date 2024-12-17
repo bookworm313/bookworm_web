@@ -32,7 +32,7 @@ onBeforeMount(async () => {
 
     // Get default user
     try {
-        const response = await axios.get('http://localhost:6543/user');
+        const response = await axios.get('http://localhost:8080/user');
         console.log(response.data);
         const defaultUser = response.data[0];
         userStore.id = defaultUser.id;
@@ -47,8 +47,14 @@ onBeforeMount(async () => {
 
     // Get current user lists
     try {
-        const response = await axios.get('http://localhost:6543/book/lists');
-        userStore.lists = response.data.filter((list) => list.id_user === userStore.id); // Filter out other users' lists
+        const response = await axios.get('http://localhost:8080/book/lists');
+        userStore.lists = response.data.map((list) => {
+            const formattedLabel = list.name.toLowerCase().replace(/\s+/g, '_');
+            return {
+                ...list,
+                formattedLabel,
+            };
+        }).filter((list) => list.id_user === userStore.id);
         console.log("Fetched user's lists: ", userStore.lists);
     } catch (error) {
         console.log("Fetch user lists error", error);
@@ -102,7 +108,7 @@ main {
     /* Enable scrolling within this section */
     grid-column: 2;
     grid-row: 2;
-
+    border-radius: 10px;
     padding: 26px;
 }
 

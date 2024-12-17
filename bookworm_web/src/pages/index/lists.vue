@@ -6,8 +6,34 @@
         </div>
         <hr>
         <div class="books">
-            <Book v-for="book in filteredBooks" :key="book.id" :name="book.name" :description="book.description"
-                :review="book.review" />
+            <!-- <Book v-for="book in filteredBooks" :key="book.id" :name="book.name" :description="book.description"
+                :review="book.review" /> -->
+            <span v-if="books.length === 0 && loadingBooks">
+                <font-awesome-icon icon="spinner" class="icon spinner" spin />
+                Loading books...
+            </span>
+            <template v-else-if="books.length === 0 && !loadingBooks">
+                <p>No books found.</p>
+            </template>
+            <template v-else>
+                <!-- <BookResult v-for="book in books" :key="book.olid" :olid="book.olid" :coverURI="book.cover.medium"
+                    :author-names="book.authors[0].name" :title="book.title" :publication-year="book.publish_date" /> -->
+                <Book v-for="book in books" :name="book.title" :key="book.olid" :olid="book.olid"
+                    :image="book.cover.medium" :author-names="book.authors[0].name" :title="book.title"
+                    :description="book.description" :publication-year="book.publish_date" :review="book.review" />
+            </template>
+
+            <!--
+                const props = defineProps({
+                    key: String || Number,
+                    name: String,
+                    author: String,
+                    publicationYear: Number,
+                    description: String,
+                    image: Blob,
+                    review: Number
+                })
+            -->
         </div>
         <Dialog v-model:visible="isDialogVisible" header="Add book" :style="{ width: '30rem' }"
             @close="isDialogVisible = false">
@@ -25,34 +51,105 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
+import { useUserStore } from '../../../store/user';
+import { generateBookDescription } from '../../../services/groqService';
+import axios from 'axios';
 
 const route = useRoute();
 
+const userStore = useUserStore();
+
+const lists = computed(() => userStore.lists);
+const list = ref(null);
+
 const isDialogVisible = ref(false)
+const bookIds = ref([null])
+
+const loadingBooks = ref(true);
+
+const groqApiKey = import.meta.env.VITE_GROQ_API_KEY;
+const groqApiUrl = import.meta.env.VITE_GROQ_API_URL;
+
+console.log("Groq API Key:", groqApiKey);
+console.log("Groq API URL:", groqApiUrl);
+
 
 const listName = computed(() => {
     const hash = route.hash.slice(1);
-    if (hash === 'favorites') return 'Favorites';
-    if (hash === 'wanted') return 'Want to Read';
-    if (hash === 'done') return 'Done Reading';
-    return 'All Books';
+    // Replace underscores with spaces and capitalize the first letter of each word
+    return hash
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 });
 
-const books = ref([
-    { id: 1, name: 'Book One', description: 'Description for Book One', review: '9.1', type: 'favorites' },
-    { id: 2, name: 'Book Two', description: 'Description for Book Two', review: '8.4', type: 'wanted' },
-    { id: 3, name: 'Book Three', description: 'Description for Book Three', review: '8.9', type: 'done' },
-    { id: 4, name: 'Book Four', description: 'Description for Book Four', review: '9.5', type: 'favorites' },
-    { id: 5, name: 'Book Five', description: 'Description for Book Five', review: '7.8', type: 'wanted' },
-    { id: 6, name: 'Book Six', description: 'Description for Book Six', review: '8.7', type: 'done' },
-]);
+const books = ref([]);
 
 const filteredBooks = computed(() => {
     const hash = route.hash.slice(1); // Remove the '#' from the hash
     return books.value.filter(book => hash ? book.type === hash : true);
 });
+
+// Funkcija za dohvat knjiga na temelju ID-jeva
+async function fetchBooksByIds(ids) {
+    const baseUrl = 'https://openlibrary.org/api/books';
+    const requests = ids.map(id => {
+        return axios.get(`${baseUrl}?bibkeys=OLID:${id}&format=json&jscmd=data`)
+            .then(response => response.data[`OLID:${id}`]) // Izvuci podatke za odgovarajući OLID
+            .catch(error => {
+                console.error(`Greška za OLID ${id}: `, error);
+                return null; // Vrati null ako je greška
+            });
+    });
+
+    // Izvrši sve zahtjeve paralelno
+    const results = await Promise.all(requests);
+    return results.filter(book => book); // Ukloni null vrijednosti
+}
+
+watchEffect(async () => {
+    const hash = route.hash.slice(1);
+
+    if (lists.value.length) { // Provjeri da `lists` nije prazan
+        console.log("Hash: ", hash);
+        list.value = lists.value.find((list) =>
+            list.name.toLowerCase().replace(/\s+/g, '_') === hash
+        );
+        console.log("Nađena lista: ", list.value);
+
+        if (list.value) {
+            bookIds.value = list.value.books_olid
+                .split(',')
+                .filter((id) => id.trim());
+            console.log("ID-ovi knjiga: ", bookIds.value);
+
+            // Dohvati knjige s Open Library API-a
+            try {
+                books.value = await fetchBooksByIds(bookIds.value);
+                console.log("Dohvaćene knjige: ", books.value);
+                loadingBooks.value = false;
+
+                // Generiraj opise knjiga pomoću Groq AI
+                await Promise.all(
+                    books.value.map(async (book) => {
+                        const { description, rating } = await generateBookDescription(book.title, book.authors?.[0]?.name || "Unknown author");
+                        book.description = description;
+                        book.review = rating;
+                    })
+                );
+
+
+                console.log("Knjige s opisima: ", books.value);
+
+            } catch (error) {
+                console.error("Greška kod dohvaćanja knjiga: ", error);
+            }
+        }
+    }
+});
+
 </script>
 
 <style scoped>

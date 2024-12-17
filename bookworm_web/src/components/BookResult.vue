@@ -4,7 +4,7 @@
         <Skeleton v-else width="150px" height="200px"></Skeleton>
         <div class="book-info">
             <h2>{{ props.title }}</h2>
-            <h3>{{ props.authorNames.join(", ") }}</h3>
+            <h3>{{ Array.isArray(props.authorNames) ? props.authorNames.join(", ") : props.authorNames }}</h3>
             <p>{{ props.publicationYear }}</p>
             <div class="review">
                 <span>--</span>
@@ -13,7 +13,7 @@
         </div>
         <div class="options">
             <MultiSelect v-model="selectedLists" @before-hide="updateLists()" :options="userStore.lists"
-                optionLabel="name" placeholder="Add to lists" :disabled="storing.value ? true : false" />
+                optionLabel="name" placeholder="Add to lists" :disabled="storing ? true : false" />
         </div>
     </div>
 </template>
@@ -52,8 +52,6 @@ onBeforeMount(() => {
         //console.log(list + " includes " + props.olid + ": " + list.books_olid.split(",").includes(props.olid))
         return list.books_olid.split(",").includes(props.olid)
     });
-    //console.log(userStore.lists[0])
-    console.log(selectedLists.value)
 })
 
 async function updateLists() {
@@ -109,7 +107,7 @@ async function updateLists() {
 
         try {
             storing.value = true;
-            const response = await axios.post('http://localhost:6543/book', payload);
+            const response = await axios.post('http://localhost:8080/book', payload);
             storing.value = false;
             console.log('Response: ', response.data);
         } catch (error) {
@@ -123,7 +121,7 @@ async function updateLists() {
 const props = defineProps({
     olid: String,
     coverURI: String,
-    authorNames: Array,
+    authorNames: [Array, String],
     title: String,
     publicationYear: Number,
 })
@@ -136,8 +134,8 @@ const props = defineProps({
 .book {
     display: grid;
     grid-template-columns: 150px 1fr auto;
-    grid-template-rows: auto 1fr;
-    gap: 10px;
+    grid-template-rows: 1fr;
+    gap: 20px;
     background-color: #EEDC98;
     padding: 13px;
     border-radius: 5px;
@@ -161,6 +159,9 @@ h3 {
 }
 
 .image {
-    width: 100%;
+    width: auto;
+    max-height: 200px;
+    object-fit: contain;
+    /* Ensures the aspect ratio is maintained */
 }
 </style>
