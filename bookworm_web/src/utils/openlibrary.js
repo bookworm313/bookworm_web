@@ -29,10 +29,12 @@ function getPortraitURI(author_olid, size) {
 }
 
 // Dohvati podatke o knjizi prema OLID-u izdanja (edition) - to je ono što će se spremat u bazi
-async function fetchBookByOLID(e_olid)
+export async function fetchBookByOLID(e_olid)
 {
-    const uri = getQueryURI(e_olid, fields, lang, limit, page);
+    const uri = e_olid ? getQueryURI(e_olid, fields, lang, limit, page) : "";
     console.log(uri);
+
+    if (!uri) return {};
 
     try {
         const response = await fetch(uri);
@@ -42,7 +44,7 @@ async function fetchBookByOLID(e_olid)
         const json = await response.json();
 
         // Zna se dogoditi da neko djelo (work) ima isti OLID kao izdanje (edition) tražene knjige, samo se razlikuju u zadnjem znaku (npr. OL123W i OL123M)
-        const work = json.docs.find((doc) => keyToOLID(doc.editions.docs[0].key) == e_olid); 
+        const work = json.docs.find((doc) => keyToOLID(doc.editions.docs[0].key.substring(0, doc.editions.docs[0].key.length - 1)) == e_olid.substring(0, e_olid.length - 1)); 
         const edition = work.editions.docs[0];
 
         const book = {
@@ -51,7 +53,7 @@ async function fetchBookByOLID(e_olid)
             author_names: edition.author_name ?? work.author_name,
             author_keys: edition.author_key ?? work.author_key,
             title: edition.title,
-            publication_year: work.first_publish_year,
+            publication_year: work?.first_publish_year,
         }
 
         console.log(`BOOK INFO (OLID: ${book.olid})\n\n${book.cover_uri}\n\nTitle: ${book.title}\nWritten by: ${book?.author_names?.join(", ")}\nFirst publish year: ${book.publication_year}`);
