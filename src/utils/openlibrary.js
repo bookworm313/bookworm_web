@@ -89,46 +89,45 @@ export async function fetchBook(e_olid) {
             book.edition.publish_date = data.publish_date;
             book.edition.cover_uri = getCoverURI(data.covers[0], "M");
 
-            console.log(book)
-
-            /*const workUri = `https://openlibrary.org${book.w_olid.key}.json`;
-            console.log("Work uri: ", workUri);
-            fetch(workUri)
-                .then(response => response.json())
-                .then(data => {
-                    book.title = data.title;
-                    book.description = data.description;
-                    if (!book.a_olid) book.a_olid = data.authors.map((author) => {
-                        if (Object.hasOwn(author, 'author'))
-                            return author.author.key;
-                        else
-                            return author.key;
-                    });
-                })
-                .catch(error => console.error('Error when fetching work:', error));
-
-                console.log(book.a_olid)
-            console.log(book)
-
-            for (const a_olid of book.a_olid) {
-                const authorUri = `https://openlibrary.org${a_olid}.json`
-                console.log("Author uri: ", authorUri);
-                console.log(authorUri)
-                fetch(authorUri)
-                    .then(response => response.json())
-                    .then(data => {
-                        const author = {
-                            name: data.name,
-                            birth_date: data.birth_date,
-                            death_date: data.death_date,
-                            bio: data.bio,
-                        }
-                        book.authors.push(author);
-                    })
-                    .catch(error => console.error('Error when fetching author:', error));
-            }*/
+            console.log(book);
         })
         .catch(error => console.error('Error when fetching edition:', error));
+
+        const workUri = `https://openlibrary.org${book.w_olid.key}.json`;
+        console.log("Work uri: ", workUri);
+        await fetch(workUri)
+            .then(response => response.json())
+            .then(data => {
+                book.title = data.title;
+                book.description = data.description?.value || data.description;
+                if (!book.a_olid) book.a_olid = data.authors.map((author) => {
+                    if (Object.hasOwn(author, 'author'))
+                        return author.author.key;
+                    else
+                        return author.key;
+                });
+            })
+            .catch(error => console.error('Error when fetching work:', error));
+        console.log(book.a_olid)
+        console.log(book)
+
+        for (const a_olid of book.a_olid) {
+            const authorUri = `https://openlibrary.org${a_olid}.json`
+            console.log("Author uri: ", authorUri);
+            console.log(authorUri)
+            await fetch(authorUri)
+                .then(response => response.json())
+                .then(data => {
+                    const author = {
+                        name: data.name,
+                        birth_date: data.birth_date,
+                        death_date: data.death_date,
+                        bio: data.bio,
+                    }
+                    book.authors.push(author);
+                })
+                .catch(error => console.error('Error when fetching author:', error));
+        }
     return book;
 }
 
