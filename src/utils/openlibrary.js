@@ -67,11 +67,11 @@ export async function fetchBook(e_olid) {
     console.log("Edition uri: ", editionUri);
     const book = {
         w_olid: null,
+        e_olid: e_olid,
         a_olid: null,
         title: null,
         description: null,
         edition: {
-            e_olid: e_olid,
             title: null,
             publisher: null,
             publish_date: null,

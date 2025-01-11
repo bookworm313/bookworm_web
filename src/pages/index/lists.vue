@@ -18,7 +18,7 @@
             <template v-else>
                 <!-- <BookResult v-for="book in books" :key="book.olid" :olid="book.olid" :coverURI="book.cover.medium"
                     :author-names="book.authors[0].name" :title="book.title" :publication-year="book.publish_date" /> -->
-                <Book v-for="book in books" :title="book.title" :cover-uri="book.edition.cover_uri"
+                <Book v-for="book in books" :olid="book.e_olid" :title="book.title" :cover-uri="book.edition.cover_uri"
                     :author-names="book.authors.map((author) => author.name)" :description="book.description"
                     :publication-year="book.publish_date" :review="book.review" />
             </template>
@@ -127,6 +127,8 @@ watchEffect(async () => {
             list.name.toLowerCase().replace(/\s+/g, '_') === hash
         );
         console.log("Nađena lista: ", list.value);
+        books.value = [];
+        loadingBooks.value = true;
 
         if (list.value) {
             bookIds.value = list.value.booksOlid

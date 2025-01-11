@@ -30,6 +30,7 @@ const selectedLists = ref(null);
 const storing = ref(false);
 
 const props = defineProps({
+    olid: String,
     title: String,
     authorNames: Array,
     publicationYear: [Number, String],

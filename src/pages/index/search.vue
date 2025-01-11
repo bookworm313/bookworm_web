@@ -18,7 +18,7 @@
             <span v-if="!hasBooks">
                 No books found for "{{ answerStore.data.query }}". Please try a different search term.
             </span>
-            <BookResult v-else v-for="book in answerStore.data.books" :key="book.olid" :olid="book.olid"
+            <BookResult v-else v-for="book in answerStore.data.books" :olid="book.olid"
                 :coverURI="book.cover_uri" :author-names="book.author_names" :title="book.title"
                 :publication-year="book.publication_year" />
         </div>
