@@ -1,21 +1,23 @@
 <template>
     <div class="book">
-        <img :src="props.coverUri" class="image" alt="img">
-        <span>
-            <h2>{{ props.title }}</h2>
-            <h3>{{ props.authorNames.join(", ") }}</h3>
-        </span>
-        <p class="description">
-            {{ props.description }}
-        </p>
-        <!-- <div class="progress"></div> -->
-        <font-awesome-icon icon="trash" class="icon trash" size="lg" />
-        <div class="review">
-            <!-- <span>{{ props.review }} </span>
-            <font-awesome-icon icon="star" class="icon star" /> -->
-            <!-- <MultiSelect v-model="selectedLists" @before-hide="updateLists()" :options="userStore.lists"
-                optionLabel="name" placeholder="Add to lists" :disabled="storing ? true : false" /> -->
+        <div class="cover-container">
+            <img :src="props.coverUri" class="image" alt="No Cover" />
         </div>
+        <div class="desc-container">
+            <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
+            <h2 class="title">{{ props.title }}</h2>
+            <h3 class="subtitle">{{ props.subtitle }}</h3>
+        </div>
+        <!-- <div class="progress"></div> -->
+        <div>
+            <font-awesome-icon icon="trash" class="icon trash" size="lg" />
+        </div>
+        <!--<div class="review">
+            <span>{{ props.review }} </span>
+            <font-awesome-icon icon="star" class="icon star" />
+            <MultiSelect v-model="selectedLists" @before-hide="updateLists()" :options="userStore.lists"
+                optionLabel="name" placeholder="Add to lists" :disabled="storing ? true : false" />
+        </div>-->
     </div>
 </template>
 
@@ -29,12 +31,17 @@ const userStore = useUserStore();
 const selectedLists = ref(null);
 const storing = ref(false);
 
+const coverLoaded = ref(true);
+function coverNotFound() {
+    coverLoaded.value = false;
+}
+
 const props = defineProps({
     olid: String,
     title: String,
+    subtitle: String,
     authorNames: Array,
-    publicationYear: [Number, String],
-    description: String,
+    publishYear: [Number, String],
     coverUri: String,
     review: Number
 })
@@ -116,39 +123,56 @@ async function updateLists() {
 
 <style scoped>
 .book {
+    max-width: 1000px;
+    min-height: 200px;
     display: grid;
-    grid-template-columns: 150px 1fr auto;
-    grid-template-rows: auto 1fr auto;
-    gap: 10px;
-    background-color: #EEDC98;
-    padding: 13px;
+    grid-template-columns: 120px auto 17.5px;
+    position: relative;
+    gap: 15px;
+    background-color: #ecdeaa;
+    padding: 15px;
     border-radius: 5px;
 }
 
-h2 {
-    grid-column: 2 / 3;
+.cover-container {
+    width: 120px;
+    min-height: 170px;
 }
 
-p {
-    grid-column: 2 / 3;
+.image {
+    width: 120px;
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
 }
 
-.description {
-    text-align: justify;
+.desc-container {
+    
+}
+
+.authors {
+    font-size: 16px;
+}
+.title {
+    font-size: 22px;
+}
+.subtitle {
+    font-size: 18px;
+    font-style: italic;
 }
 
 .review {
     display: flex;
     align-items: center;
     gap: 5px;
-    grid-row: 3;
     direction: flex;
     align-items: center;
 }
 
 .trash {
-    grid-column: 3;
-    grid-row: 1;
     color: var(--red);
 }
 
@@ -165,8 +189,4 @@ p {
     color: var(--gold);
 }
 
-.image {
-    width: 100%;
-    grid-row: 1 / 4;
-}
 </style>

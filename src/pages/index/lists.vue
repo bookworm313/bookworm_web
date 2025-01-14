@@ -16,11 +16,8 @@
                 <p>No books found.</p>
             </template>
             <template v-else>
-                <!-- <BookResult v-for="book in books" :key="book.olid" :olid="book.olid" :coverURI="book.cover.medium"
-                    :author-names="book.authors[0].name" :title="book.title" :publication-year="book.publish_date" /> -->
-                <Book v-for="book in books" :olid="book.e_olid" :title="book.title" :cover-uri="book.edition.cover_uri"
-                    :author-names="book.authors.map((author) => author.name)" :description="book.description"
-                    :publication-year="book.publish_date" :review="book.review" />
+                <Book v-for="book in books" :olid="book.olid" :title="book.title" :subtitle="book.subtitle"
+                    :author-names="book.authors" :publish-year="book.publish_year" :cover-uri="book.cover_uri" :review="book.review" />
             </template>
 
             <!--
@@ -51,23 +48,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watchEffect } from 'vue';
-import { useRoute } from 'vue-router';
-import { generateBookDescription } from '../../../services/groqService';
-import axios from 'axios';
+const loggedInUserId = 1;
 
-import listsData from '/src/data/lists.json'
-import { fetchBook } from '../../utils/openlibrary';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
+
+import { fetchBooksByOLID } from '../../utils/openlibrary';
+import { getUserLists } from '../../../services/users';
 
 const route = useRoute();
 
-const lists = computed(() => listsData);
-const list = ref(null);
-
 const isDialogVisible = ref(false)
-const bookIds = ref([null])
 
-const loadingBooks = ref(true);
 
 const groqApiKey = import.meta.env.VITE_GROQ_API_KEY;
 const groqApiUrl = import.meta.env.VITE_GROQ_API_URL;
@@ -85,46 +77,22 @@ const listName = computed(() => {
         .join(' ');
 });
 
-const books = ref([]);
+const lists = ref([]); // Sve liste
+const list = ref(null); // Lista odabrana za prikazati
+const books = ref([]); // Knjige iz odabrane liste
+const bookIds = ref([null]) // (OL)ID-jevi knjiga iz odabrane liste
 
-const filteredBooks = computed(() => {
-    const hash = route.hash.slice(1); // Remove the '#' from the hash
-    return books.value.filter(book => hash ? book.type === hash : true);
-});
+const loadingBooks = ref(true); // Označava da se knjige trenutno dohvaćaju
 
-// Funkcija za dohvat knjiga na temelju ID-jeva
-async function fetchBooksByIds(ids) {
+const hash = computed(() => route.hash.slice(1));
 
-    const fetchedBooks = [];
-    for (const id of ids) {
-        const book = await fetchBook(id);
-        fetchedBooks.push(book);
-    }
+watch (hash, async () => {
 
-    /*const baseUrl = 'https://openlibrary.org/api/books';
-    const requests = ids.map(id => {
-        return axios.get(`${baseUrl}?bibkeys=OLID:${id}&format=json&jscmd=data`)
-            .then(response => response.data[`OLID:${id}`]) // Izvuci podatke za odgovarajući OLID
-            .catch(error => {
-                console.error(`Greška za OLID ${id}: `, error);
-                return null; // Vrati null ako je greška
-            });
-    });
-
-    // Izvrši sve zahtjeve paralelno
-    const results = await Promise.all(requests);
-    return results.filter(book => book); // Ukloni null vrijednosti*/
-
-    return fetchedBooks;
-}
-
-watchEffect(async () => {
-    const hash = route.hash.slice(1);
+    lists.value = await getUserLists(loggedInUserId);
 
     if (lists.value.length) { // Provjeri da `lists` nije prazan
-        console.log("Hash: ", hash);
         list.value = lists.value.find((list) =>
-            list.name.toLowerCase().replace(/\s+/g, '_') === hash
+            list.name.toLowerCase().replace(/\s+/g, '_') === hash.value
         );
         console.log("Nađena lista: ", list.value);
         books.value = [];
@@ -138,7 +106,7 @@ watchEffect(async () => {
             // Dohvati knjige s Open Library API-a
             try {
                 //console.log("Prazne knjige: ", books.value);
-                books.value = await fetchBooksByIds(bookIds.value);
+                books.value = await fetchBooksByOLID(bookIds.value);
                 console.log("Dohvaćene knjige: ", books.value);
                 loadingBooks.value = false;
 
@@ -147,7 +115,8 @@ watchEffect(async () => {
             }
         }
     }
-});
+},
+{ immediate: true })
 
 </script>
 
@@ -179,7 +148,6 @@ watchEffect(async () => {
 
 .books {
     display: grid;
-    grid-template-rows: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
     padding: 20px;
     background-color: var(--bg);

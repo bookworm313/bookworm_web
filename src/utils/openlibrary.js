@@ -1,15 +1,11 @@
-const search_input = document.getElementById("query-input");
-const submit_button = document.getElementById("submit-button");
-const content = document.getElementById("content");
-const search_results = document.getElementById("search-results");
-
-const fields = "editions,key,cover_i,author_key,author_name,first_publish_year,title,work";
+const fields = "editions,key,cover_i,title,subtitle,publish_date,author_name";
 const lang = "eng";
 const limit = 10;
 const page = 1;
 
 function keyToOLID(key) {
     // "/books/OL1234M" => OL1234M
+    if (!key) return undefined;
     return key.substring(key.lastIndexOf("/") + 1)
 }
 
@@ -21,15 +17,24 @@ function getQueryURI(query, fields, lang, limit, page) {
 }
 // Slika korice knjige
 function getCoverURI(cover_id, size) {
+    if (!cover_id) return undefined;
     return encodeURI(`https://covers.openlibrary.org/b/id/${cover_id}-${size}.jpg?default=false`); // Vraća 404 ako ne postoji
+}
+function getCoverURIByOLID(olid, size) {
+    if (!olid) return undefined;
+    return encodeURI(`https://covers.openlibrary.org/b/olid/${olid}-${size}.jpg?default=false`)
 }
 // Slika autora
 function getPortraitURI(author_olid, size) {
     return encodeURI(`https://covers.openlibrary.org/a/olid/${author_olid}-${size}.jpg?default=false`) // Vraća 404 ako ne postoji
 }
 
-// Dohvati podatke o knjizi prema OLID-u izdanja (edition) - to je ono što će se spremat u bazi
-export async function fetchBookByOLID(e_olid)
+function getYearFromDate(dateStr) {
+    const dateObj = new Date(dateStr);
+    return dateObj ? dateObj.getFullYear() : 'yyyy';
+}
+
+/*export async function fetchBookByOLID(e_olid)
 {
     const uri = e_olid ? `https://openlibrary.org/api/books?bibkeys=OLID:${e_olid}&format=json&jscmd=data` : "";
     console.log(uri);
@@ -60,9 +65,37 @@ export async function fetchBookByOLID(e_olid)
     } catch (err) {
         console.log("Fetch error: ", err);
     }
+}*/
+
+// Dohvati osnovne podatke o skupu knjiga prema njihovim OLID-ima
+export async function fetchBooksByOLID(olids)
+{
+    const olidsString = olids.map((olid) => 'OLID:' + olid).join(',');
+    const uri = `https://openlibrary.org/api/books?bibkeys=${olidsString}&format=json&jscmd=data`;
+    
+    const books = [];
+
+    await fetch(uri)
+        .then(response => response.json())
+        .then(data => {
+            for (const olid in data) {
+                const book = data[olid];
+                books.push({
+                    olid: keyToOLID(book.key),
+                    title: book.title,
+                    subtitle: book.subtitle ? String(book.subtitle).charAt(0).toUpperCase() + String(book.subtitle).slice(1) : undefined,
+                    publish_year: getYearFromDate(book.publish_date?.[0]),
+                    authors: book.authors?.map((author) => author.name),
+                    cover_uri: getCoverURIByOLID(keyToOLID(book.key), "M")
+                })
+            }
+        })
+        .catch(error => console.error('Greška pri dohvaćanju knjiga (fetchBooksByOLID):', error));
+
+    return books;
 }
 
-export async function fetchBook(e_olid) {
+/*export async function fetchBook(e_olid) {
     const editionUri = `https://openlibrary.org/books/${e_olid}.json`;
     console.log("Edition uri: ", editionUri);
     const book = {
@@ -87,7 +120,7 @@ export async function fetchBook(e_olid) {
             book.edition.title = data.title;
             book.edition.publisher = data.publisher;
             book.edition.publish_date = data.publish_date;
-            book.edition.cover_uri = getCoverURI(data.covers[0], "M");
+            book.edition.cover_uri = getCoverURI(data.covers?.[0], "M");
 
             console.log(book);
         })
@@ -129,7 +162,7 @@ export async function fetchBook(e_olid) {
                 .catch(error => console.error('Error when fetching author:', error));
         }
     return book;
-}
+}*/
 
 // Dohvati podatke o autoru prema OLID-u autora
 async function fetchAuthorByOLID(a_olid)
@@ -172,7 +205,7 @@ export async function fetchBooks(query, lang, limit, page)
     // Odredi URI upita
     // fields - koje atribute dohvatiti, ne bi se trebalo mijenjat
     const uri = getQueryURI(query, fields, lang, limit, page);
-    console.log(uri);
+    console.log(`URI za upit '${query}':\n${uri}`);
 
     try {
         const response = await fetch(uri);
@@ -187,23 +220,18 @@ export async function fetchBooks(query, lang, limit, page)
             retrieved_count: json.docs.length, // najčešće = limit, ali neki upit može rezultirati s još manje knjiga
             total_count: json.num_found, // ukupan broj knjiga koje odgovaraju upitu
             books: json.docs.map((work) => {
-                const edition = work?.editions?.docs?.[0];
+                const book = work?.editions?.docs?.[0];
                 return {
-                    olid: edition.key.substring(edition.key.lastIndexOf("/") + 1),
-                    cover_uri: getCoverURI(edition.cover_i, "M"),
-                    author_names: edition.author_name ?? work.author_name,
-                    author_keys: edition.author_key ?? work.author_key,
-                    title: edition.title,
-                    publication_year: work.first_publish_year,
+                    olid: keyToOLID(book.key),
+                    title: book.title,
+                    subtitle: book.subtitle ? String(book.subtitle).charAt(0).toUpperCase() + String(book.subtitle).slice(1) : undefined,
+                    publish_year: getYearFromDate(book.publish_date?.[0]),
+                    authors: work.author_name,
+                    cover_uri: getCoverURIByOLID(keyToOLID(book.key), "M")
                 }
             })
         };
 
-        /*console.log(`Page ${page}/${Math.ceil(results.total_count / results.retrieved_count)}`)
-        for (let i = 0; i < results.retrieved_count; i++) {
-            const book = results.books[i];
-            console.log(`${results.start + 1 + i}/${results.total_count}\n\tBOOK INFO (OLID: ${book.olid})\n\n\t${book.cover_uri}\n\n\tTitle: ${book.title}\n\tWritten by: ${book?.author_names?.join(", ")}\n\tFirst publish year: ${book.publication_year}`);
-        }*/
         return results;
     }
     catch (err) {

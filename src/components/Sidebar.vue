@@ -13,7 +13,7 @@
                             :icon="section.expanded ? 'chevron-up' : 'chevron-down'" size="xs" class="chevron-icon" />
                     </div>
                     <ul v-if="section.children && section.expanded" class="nested-links">
-                        <li v-for="child in section.children" :key="child.to">
+                        <li v-for="child in section.children" :key="child.to" @click="updateListData()">
                             <router-link :to="child.to" :class="['nav-link', { active: isActiveRoute(child.to) }]">
                                 <font-awesome-icon :icon="child.icon" />
                                 <span>{{ child.label }}</span>
@@ -27,16 +27,25 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getLists } from '../../services/books';
+const loggedInUserId = 1;
 
-import listsData from '/src/data/lists.json'
+import { computed, onBeforeMount, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+import { getUserLists } from '../../services/users';
 
 const route = useRoute();
 const router = useRouter();
 
-const lists = computed(() => listsData);
+const lists = ref([]);
+async function updateListData() {
+    lists.value = await getUserLists(loggedInUserId);
+}
+
+onBeforeMount(async () => {
+    await updateListData();
+    //lists.value = await getUserLists(loggedInUserId); // TODO: Login
+})
 
 const sections = ref([
     { label: 'Homepage', to: '/', icon: 'house', isActive: false },
@@ -51,9 +60,9 @@ const sections = ref([
     //{ label: 'Random', to: '/random', icon: 'shuffle', isActive: false },
 ]);
 
-function updateListsInSections() {
+async function updateListsInSections() {
     // Map the lists to children structure
-    const formattedChildren = listsData.map((list) => {
+    const formattedChildren = lists.value.map((list) => {
         const formattedLabel = list.name.toLowerCase().replace(/\s+/g, '_'); // Convert label to lowercase and replace spaces with underscores
         let icon;
 
@@ -108,9 +117,9 @@ watch(lists, () => {
     console.log(sections.value)
 }, { immediate: true });
 
-onMounted(async () => {
+/*onMounted(async () => {
     console.log("Liste: ", lists.value);
-});
+});*/
 
 const toggleSection = (section) => {
     if (section.children) {

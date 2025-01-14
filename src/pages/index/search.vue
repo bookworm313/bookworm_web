@@ -13,14 +13,13 @@
         </span>
 
         <!-- Show results or no-results message -->
-        <div v-else>
+        <div v-else class="books">
             <h1>Results for "{{ answerStore.data.query }}"</h1>
             <span v-if="!hasBooks">
                 No books found for "{{ answerStore.data.query }}". Please try a different search term.
             </span>
-            <BookResult v-else v-for="book in answerStore.data.books" :olid="book.olid"
-                :coverURI="book.cover_uri" :author-names="book.author_names" :title="book.title"
-                :publication-year="book.publication_year" />
+            <BookResult v-else v-for="book in answerStore.data.books" :olid="book.olid" :title="book.title" :subtitle="book.subtitle"
+            :author-names="book.authors" :publish-year="book.publish_year" :cover-uri="book.cover_uri" :review="book.review" />
         </div>
     </div>
 </template>
@@ -37,3 +36,13 @@ const loading = computed(() => answerStore.loading);
 const hasResults = computed(() => Object.keys(answerStore.data).length > 0);
 const hasBooks = computed(() => answerStore.data?.books?.length > 0);
 </script>
+
+<style scoped>
+
+.books {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--bg);
+}
+</style>
