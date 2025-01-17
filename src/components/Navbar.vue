@@ -1,14 +1,19 @@
 <template>
     <section>
-        <IconField>
-            <InputIcon :class="loader ? 'pi pi-spin pi-spinner' : 'pi pi-search'" />
-            <InputText @keydown.enter="answerStore.loading == true; initiateQuery();" v-model="search"
-                placeholder="Search books, authors, etc." />
-        </IconField>
-        <div class="options">
-            <Button icon="pi pi-plus" label="Test" @click="showAddListDialog()" />
-            <div class="icons">
-                <font-awesome-icon class="icon" icon="user-gear" size="lg" />
+        <div class="logo-container">
+            <img src="../assets/images/bookworm-logo.svg" alt="Logo" class="logo" />
+        </div>
+        <div class="nav-content">
+            <IconField>
+                <InputIcon :class="loader ? 'pi pi-spin pi-spinner' : 'pi pi-search'" />
+                <InputText @keydown.enter="answerStore.loading == true; initiateQuery();" v-model="search"
+                    placeholder="Search books, authors, etc." />
+            </IconField>
+            <div class="options">
+                <Button icon="pi pi-plus" label="Test" @click="showAddListDialog()" />
+                <div class="icons">
+                    <font-awesome-icon class="icon" icon="user-gear" size="lg" />
+                </div>
             </div>
         </div>
     </section>
@@ -54,6 +59,7 @@ const initiateQuery = async () => {
 
         try {
             const results = await fetchBooks(search.value, "eng", 10, 1);
+            console.log("Rezultat pretraživanja: ", results);
             answerStore.data = results || {}; // Store fetched data
         } catch (error) {
             console.error("Error fetching books:", error);
@@ -76,14 +82,33 @@ const showAddListDialog = () => {
 
 <style scoped>
 section {
-    height: 100%;
-    padding: 26px;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    position: fixed;
 
+    background-color: var(--primary);
+    box-shadow: 0 5px 10px rgba(168, 172, 187, 0.05), 0 5px 20px rgba(177, 181, 197, 0.2);
+}
+.nav-content {
+    width: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-grow: 1;
+    padding: 26px;
+}
 
-    background-color: var(--primary);
+.logo-container {
+    width: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.logo {
+    width: 198px;
+    height: 54px;
+    object-fit: contain;
 }
 
 .icon:hover {

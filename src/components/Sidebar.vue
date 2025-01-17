@@ -1,7 +1,5 @@
 <template>
     <aside class="sidebar">
-        <img src="../assets/images/bookworm-logo.svg" alt="Logo" class="logo" />
-        <hr />
         <nav>
             <ul>
                 <li v-for="section in sections" :key="section.label">
@@ -32,7 +30,7 @@ const loggedInUserId = 1;
 import { computed, onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { getUserLists } from '../../services/users';
+import { getUserLists } from '../../services/serverApi';
 
 const route = useRoute();
 const router = useRouter();
@@ -135,15 +133,9 @@ const toggleSection = (section) => {
     width: 250px;
     height: 100dvh;
     background-color: var(--primary);
-    padding: 13px 26px;
+    padding: 26px;
     display: flex;
     flex-direction: column;
-}
-
-.logo {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
 }
 
 hr {

@@ -26,7 +26,7 @@ const loggedInUserId = 1;
 
 import { computed, onBeforeMount, ref } from 'vue';
 import MultiSelect from 'primevue/multiselect';
-import { getUserLists, updateBookBelonging } from '../../services/users';
+import { getUserLists, updateBookBelonging } from '../../services/serverApi';
 
 const lists = ref([]);
 const selectedLists = ref(null);
@@ -54,7 +54,6 @@ const props = defineProps({
 
 <style scoped>
 .book {
-    max-width: 1000px;
     min-height: 200px;
     display: grid;
     grid-template-columns: 120px auto 200px;
@@ -78,10 +77,6 @@ const props = defineProps({
     justify-content: center;
     align-items: center;
     text-align: center;
-}
-
-.desc-container {
-    
 }
 
 .authors {

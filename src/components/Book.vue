@@ -123,7 +123,6 @@ async function updateLists() {
 
 <style scoped>
 .book {
-    max-width: 1000px;
     min-height: 200px;
     display: grid;
     grid-template-columns: 120px auto 17.5px;

@@ -43,6 +43,5 @@ const hasBooks = computed(() => answerStore.data?.books?.length > 0);
     display: grid;
     gap: 20px;
     padding: 20px;
-    background-color: var(--bg);
 }
 </style>

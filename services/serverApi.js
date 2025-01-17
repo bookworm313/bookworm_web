@@ -45,7 +45,36 @@ export const getUserLists = async (id) => {
     }
 }
 
-// In Search; update which lists a book belongs to
+export const getWantToRead = async (id) => {
+    try {
+        const url = `${baseUrl}/user/${id}/lists/want_to_read`;
+        const res = await fetch(url);
+        if (!res.ok) {
+            console.log('Fetch user Want To Read list: Network response was not ok');
+            return null;
+        }
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+}
+export const getDoneReading = async (id) => {
+    try {
+        const url = `${baseUrl}/user/${id}/lists/done_reading`;
+        const res = await fetch(url);
+        if (!res.ok) {
+            console.log('Fetch user Want To Read list: Network response was not ok');
+            return null;
+        }
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// Ažurira popis lista kojima knjiga pripada, koristi se kad se promijeni unos u MultiSelectu u BookResult
 export const updateBookBelonging = async (loggedInUserId, selectedListsIds, olid) => {
     try {
         const url = `${baseUrl}/lists/add`;

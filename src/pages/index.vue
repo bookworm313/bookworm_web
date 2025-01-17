@@ -22,9 +22,6 @@
 
 import Sidebar from '../components/Sidebar.vue';
 
-import { onBeforeMount, ref } from 'vue';
-import axios from 'axios';
-
 </script>
 
 <style scoped>
@@ -42,12 +39,13 @@ main {
     display: flex;
     width: 250px;
     grid-column: 1;
-    grid-row: 1 / 3;
+    grid-row: 2;
 
     position: fixed;
-    top: 0;
+    top: 80px;
     height: 100%;
     overflow-y: auto;
+    z-index: 1;
 }
 
 .vertical-hr {
@@ -58,8 +56,9 @@ main {
 }
 
 .navbar {
-    grid-column: 2 / 4;
+    grid-column: 1 / 4;
     width: 100%;
+    z-index: 2;
     /* position: fixed;
     right: 0;
     top: 0;

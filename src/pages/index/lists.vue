@@ -54,7 +54,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { fetchBooksByOLID } from '../../utils/openlibrary';
-import { getUserLists } from '../../../services/users';
+import { getUserLists } from '../../../services/serverApi';
 
 const route = useRoute();
 
@@ -150,7 +150,6 @@ watch (hash, async () => {
     display: grid;
     gap: 20px;
     padding: 20px;
-    background-color: var(--bg);
 }
 
 .secondary {
