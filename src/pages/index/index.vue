@@ -53,7 +53,7 @@ import Carousel from 'primevue/carousel';
 
 import { onBeforeMount, ref } from 'vue';
 import { getWantToRead } from '../../../services/serverApi';
-import { fetchBooksByOLID } from '../../utils/openlibrary';
+import { fetchBooksByOLID, fetchBookByQuery } from '../../utils/openlibrary';
 import { generateRecommendations } from '../../../services/groqService';
 
 const toReadBooks = ref([{},{},{},{},{},{},{},{}]);
@@ -83,6 +83,9 @@ onBeforeMount(async () => {
         }
     }
     console.log(recommendedBooks.value)
+
+    const test = await fetchBookByQuery(recommendedBooks.value[0].title + " " + recommendedBooks.value[0].authors);
+    console.log(test)
 
     loadingBooks.value = false;
 });

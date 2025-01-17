@@ -238,3 +238,34 @@ export async function fetchBooks(query, lang, limit, page)
         console.log("Fetch error: ", err);
     }
 }
+
+// Koristi se za dohvaćanje knjige prema generiranoj preporuci (string koji sadrži naslov i ime pisaca)
+export async function fetchBookByQuery(query, lang = "eng", limit = 1, page = 1)
+{
+    const fields = "editions,key,cover_i,title,publish_date,author_name";
+    const uri = getQueryURI(query, fields, lang, limit, page);
+    console.log(`URI za upit '${query}':\n${uri}`);
+
+    try {
+        const response = await fetch(uri);
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+        const json = await response.json();
+        
+        const work = json.docs[0];
+        const edition = work.editions.docs[0];
+        const results = {
+            olid: keyToOLID(edition.key ?? work.key),
+            title: edition.title ?? work.title,
+            publish_year: getYearFromDate(edition.publish_date?.[0] ?? work.publish_date?.[0]),
+            authors: edition.author_name ?? work.author_name,
+            cover_uri: getCoverURIByOLID(keyToOLID(edition.key ?? work.key), "M")
+        };
+
+        return results;
+    }
+    catch (err) {
+        console.log("Fetch error: ", err);
+    }
+}
