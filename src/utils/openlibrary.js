@@ -254,7 +254,7 @@ export async function fetchBookByQuery(query, lang = "eng", limit = 1, page = 1)
         const json = await response.json();
         
         const work = json.docs[0];
-        const edition = work.editions.docs[0];
+        const edition = work?.editions.docs[0];
         const results = {
             olid: keyToOLID(edition.key ?? work.key),
             title: edition.title ?? work.title,
