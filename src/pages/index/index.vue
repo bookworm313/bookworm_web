@@ -3,43 +3,17 @@
         <h1>Discover</h1>
         <hr>
         <div class="discover">
-            <div class="discover-container">
-                <div class="discover-head">
-                    <h1 class="">Up next...</h1>
+            <DiscoverCategory :title="'Up next'" :loading-books="loadingBooks" :books="toReadBooks">
+                <template v-slot:description>
                     <p>From your <RouterLink class="link" to="/lists#want_to_read">&nbsp;<font-awesome-icon :icon="'book-bookmark'" /> Want To Read</RouterLink> list</p>
-                </div>
-                <div class="discover-content">
-                    <Carousel v-if="loadingBooks || toReadBooks.length > 0" :value="toReadBooks" :num-visible="8" :numScroll="1" :showIndicators="false" >
-                        <template #item="slotProps" :empty="" >
-                            <div class="carousel-item-container">
-                                <div class="carousel-item">
-                                    <Skeleton v-if="!slotProps.data.cover_uri" width="200px" height="333px"></Skeleton>
-                                    <img v-else :src="slotProps.data.cover_uri" >
-                                    <div class="carousel-item-desc">
-                                        <p class="book-authors">{{ slotProps.data.authors?.join(',') }}</p>
-                                        <p class="book-title">{{ slotProps.data.title }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </Carousel>
-                    <div v-else>Add some books to the list and they'll show up here!</div>
-                </div>
-            </div>
-            <div class="discover-container">
-                <div class="discover-head">
-                    <h1 class="">You might like these</h1>
+                </template>
+            </DiscoverCategory>
+            
+            <DiscoverCategory :title="`We think you'll like these...`" :loading-books="loadingBooks" :books="recommendedBooks">
+                <template v-slot:description>
                     <p>Generated recommendations based on your <RouterLink class="link" to="/lists#done_reading">&nbsp;<font-awesome-icon :icon="'book-open'" /> Done Reading</RouterLink> list</p>
-                </div>
-                <div class="discover-content">
-                    <div v-if="recommendedBooks">
-                        <p v-for="recBook in recommendedBooks">
-                            {{ recBook.title }} by {{ recBook.authors }}
-                        </p>
-                    </div>
-                    <div v-else>Add some books to the list and they'll show up here!</div>
-                </div>
-            </div>
+                </template>
+            </DiscoverCategory>
         </div>
         
     </div>
@@ -51,13 +25,15 @@ const loggedInUserId = 1;
 import Skeleton from 'primevue/skeleton';
 import Carousel from 'primevue/carousel';
 
+import DiscoverCategory from '../../components/DiscoverCategory.vue'
+
 import { onBeforeMount, ref } from 'vue';
 import { getWantToRead } from '../../../services/serverApi';
-import { fetchBooksByOLID } from '../../utils/openlibrary';
+import { fetchBooksByOLID, fetchBookByQuery } from '../../utils/openlibrary';
 import { generateRecommendations } from '../../../services/groqService';
 
 const toReadBooks = ref([{},{},{},{},{},{},{},{}]);
-const recommendedBooks = ref("");
+const recommendedBooks = ref([{},{},{},{},{},{},{},{}]);
 const loadingBooks = ref(true);
 
 onBeforeMount(async () => {
@@ -73,17 +49,20 @@ onBeforeMount(async () => {
         console.error("Greška kod dohvaćanja knjiga: ", error);
     }
 
-    recommendedBooks.value = await generateRecommendations(loggedInUserId);
-    recommendedBooks.value = recommendedBooks.value.split("###");
-    recommendedBooks.value.pop(); // jer i zadnji element završi na ### pa će ostat prazni element na kraju
-    for (let i = 0; i < recommendedBooks.value.length; i++) {
-        recommendedBooks.value[i] = {
-            title: recommendedBooks.value[i].split(";;;")[0],
-            authors: recommendedBooks.value[i].split(";;;")[1]
-        }
+    let recBooks = await generateRecommendations(loggedInUserId);
+    recBooks = recBooks.split("###");
+    recBooks.pop(); // jer i zadnji element završi na ### pa će ostat prazni element na kraju
+
+    const recBooksTemp = [];
+    for (const recBookStr of recBooks) {
+        const recBook = await fetchBookByQuery(recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0]);
+        if (!recBook) continue;
+        console.log("Rezultat za " + recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0], recBook);
+        recBooksTemp.push(recBook);
     }
     console.log(recommendedBooks.value)
 
+    recommendedBooks.value = recBooksTemp;
     loadingBooks.value = false;
 });
 
@@ -128,10 +107,6 @@ onBeforeMount(async () => {
 
 hr {
     margin: 13px 0;
-}
-
-h2 {
-    font-size: 1.5em;
 }
 
 .discover {

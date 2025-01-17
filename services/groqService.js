@@ -43,7 +43,7 @@ export async function getGroqChatCompletion(booksString) {
       messages: [
         {
           role: "user",
-          content: "Recommend me 8 books that you think I'd enjoy after having read the following books, listed in the format '<book title>;;; <authors seperated by commas>###':\n" + booksString + "and write the recommendations in the format '<book title>;;; <authors seperated by commas>###', without any additional notes.",
+          content: "Recommend me 10 books that you think I'd enjoy after having read the following books, listed in the format '<book title>;;; <authors seperated by commas>###':\n" + booksString + "and write the recommendations in the format '<book title>;;; <authors seperated by commas>###', without any additional notes.",
         },
   
       ],
