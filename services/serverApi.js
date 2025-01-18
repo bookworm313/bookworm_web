@@ -99,3 +99,27 @@ export const updateBookBelonging = async (loggedInUserId, selectedListsIds, olid
         console.error(error);
     }
 }
+
+export const removeBookFromList = async (loggedInUserId, listId, olid) => {
+    try {
+        const url = `${baseUrl}/remove/book`;
+        const res = await fetch(url, {
+            method: 'put',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                userId: loggedInUserId,
+                listId: listId,
+                bookOlid: olid
+            })
+        });
+        if (!res.ok) {
+            console.log('PUT remove book: Network response was not ok');
+            return;
+        }
+        console.log('PUT Successful: removeBookFromList');
+    } catch (error) {
+        console.error(error);
+    }
+}

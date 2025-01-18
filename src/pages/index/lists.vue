@@ -16,7 +16,7 @@
                 <p>No books found.</p>
             </template>
             <template v-else>
-                <Book v-for="book in books" :olid="book.olid" :title="book.title" :subtitle="book.subtitle"
+                <Book v-for="book in books" :list-id="list.id" :olid="book.olid" :title="book.title" :subtitle="book.subtitle"
                     :author-names="book.authors" :publish-year="book.publish_year" :cover-uri="book.cover_uri" :review="book.review" />
             </template>
 
