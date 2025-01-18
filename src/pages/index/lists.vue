@@ -105,7 +105,6 @@ watch (hash, async () => {
 
             // Dohvati knjige s Open Library API-a
             try {
-                //console.log("Prazne knjige: ", books.value);
                 books.value = await fetchBooksByOLID(bookIds.value);
                 console.log("Dohvaćene knjige: ", books.value);
                 loadingBooks.value = false;
