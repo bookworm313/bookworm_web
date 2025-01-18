@@ -3,13 +3,13 @@
         <h1>Discover</h1>
         <hr>
         <div class="discover">
-            <DiscoverCategory :title="'Up next'" :loading-books="loadingBooks" :books="toReadBooks">
+            <DiscoverCategory :is-new="false" :title="'Up next'" :loading-books="loadingBooks" :books="toReadBooks">
                 <template v-slot:description>
                     <p>From your <RouterLink class="link" to="/lists#want_to_read">&nbsp;<font-awesome-icon :icon="'book-bookmark'" /> Want To Read</RouterLink> list</p>
                 </template>
             </DiscoverCategory>
             
-            <DiscoverCategory :title="`We think you'll like these...`" :loading-books="loadingBooks" :books="recommendedBooks">
+            <DiscoverCategory :is-new="true" :title="`We think you'll like these...`" :loading-books="loadingBooks" :books="recommendedBooks">
                 <template v-slot:description>
                     <p>Generated recommendations based on your <RouterLink class="link" to="/lists#done_reading">&nbsp;<font-awesome-icon :icon="'book-open'" /> Done Reading</RouterLink> list</p>
                 </template>
@@ -22,8 +22,7 @@
 <script setup>
 const loggedInUserId = 1;
 
-import Skeleton from 'primevue/skeleton';
-import Carousel from 'primevue/carousel';
+import { MultiSelect } from 'primevue';
 
 import DiscoverCategory from '../../components/DiscoverCategory.vue'
 
@@ -46,7 +45,6 @@ onBeforeMount(async () => {
         
         try {
             toReadBooks.value = await fetchBooksByOLID(bookIds);
-            console.log("Dohvaćene knjige: ", toReadBooks.value);
         } catch (error) {
             console.error("Greška kod dohvaćanja knjiga: ", error);
         }
@@ -61,10 +59,8 @@ onBeforeMount(async () => {
         for (const recBookStr of recBooks) {
             const recBook = await fetchBookByQuery(recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0]);
             if (!recBook) continue;
-            console.log("Rezultat za " + recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0], recBook);
             recBooksTemp.push(recBook);
         }
-        console.log(recommendedBooks.value)
 
         recommendedBooks.value = recBooksTemp;
     }
