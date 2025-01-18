@@ -1,5 +1,5 @@
 <template>
-    <div class="book">
+    <div class="book" v-if="!isRemoved">
         <div class="cover-container">
             <img :src="props.coverUri" class="image" alt="No Cover" />
         </div>
@@ -10,7 +10,7 @@
         </div>
         <!-- <div class="progress"></div> -->
         <div>
-            <font-awesome-icon icon="trash" class="icon trash" size="lg" />
+            <font-awesome-icon icon="trash" class="icon trash" size="lg" @click="removeFromList(props.listId, props.olid)" />
         </div>
         <!--<div class="review">
             <span>{{ props.review }} </span>
@@ -22,14 +22,17 @@
 </template>
 
 <script setup>
-import { computed, onBeforeMount, ref } from 'vue';
-import axios from 'axios';
-import MultiSelect from 'primevue/multiselect';
+const loggedInUserId = 1;
+
+import { onBeforeMount, ref } from 'vue';
 import { useUserStore } from '../../store/user';
+import { removeBookFromList } from '../../services/serverApi';
 
 const userStore = useUserStore();
 const selectedLists = ref(null);
 const storing = ref(false);
+
+const isRemoved = ref(false);
 
 const coverLoaded = ref(true);
 function coverNotFound() {
@@ -37,6 +40,7 @@ function coverNotFound() {
 }
 
 const props = defineProps({
+    listId: Number,
     olid: String,
     title: String,
     subtitle: String,
@@ -54,68 +58,9 @@ onBeforeMount(() => {
     });
 })
 
-async function updateLists() {
-    console.log("enter");
-
-    // userStore.lists.length
-    for (let i = 0; i < userStore.lists.length; i++) {
-        const list = userStore.lists[i];
-
-        const correspondingSelected = selectedLists.value.find((selectedList) => list.id === selectedList.id)
-        console.log("corr", list, correspondingSelected)
-
-        let newOlid = "";
-
-        if (list.books_olid.includes(props.olid)) {
-            // List was previously selected
-
-            if (correspondingSelected) {
-                // List is still selected
-                newOlid = list.books_olid;
-                console.log(1)
-            }
-            else {
-                // List is no longer selected
-                newOlid = list.books_olid.replace(`${props.olid},`, '');
-                console.log(2)
-            }
-        }
-        else {
-            // List wasn't selected previously
-
-            if (correspondingSelected) {
-                // List is now selected
-                newOlid = list.books_olid.concat(`${props.olid},`);
-                console.log(3)
-            }
-            else {
-                // List is still not selected
-                newOlid = list.books_olid;
-                console.log(4)
-            }
-        }
-
-        const payload = {
-            list_id: list.id,
-            books_olid: newOlid,
-        };
-
-        console.log(list.name + ": prev olid: " + list.books_olid);
-        console.log(list.name + ": new olid: " + newOlid);
-        userStore.lists[i].books_olid = payload.books_olid;
-        console.log("hm", list.name, list.books_olid)
-
-        try {
-            storing.value = true;
-            const response = await axios.post('http://localhost:8080/book', payload);
-            storing.value = false;
-            console.log('Response: ', response.data);
-        } catch (error) {
-            console.log('Error: ', error.response?.data || error.message);
-        }
-    }
-
-    console.log("exit")
+async function removeFromList(listId, olid) {
+    await removeBookFromList(loggedInUserId, listId, olid);
+    isRemoved.value = true;
 }
 
 

@@ -40,29 +40,35 @@ onBeforeMount(async () => {
 
     loadingBooks.value = true;
     const toReadList = await getWantToRead(loggedInUserId);
-    const bookIds = toReadList.booksOlid;
-    console.log(bookIds)
-    try {
-        toReadBooks.value = await fetchBooksByOLID(bookIds);
-        console.log("Dohvaćene knjige: ", toReadBooks.value);
-    } catch (error) {
-        console.error("Greška kod dohvaćanja knjiga: ", error);
+
+    if (toReadList) {
+        const bookIds = toReadList.booksOlid;
+        
+        try {
+            toReadBooks.value = await fetchBooksByOLID(bookIds);
+            console.log("Dohvaćene knjige: ", toReadBooks.value);
+        } catch (error) {
+            console.error("Greška kod dohvaćanja knjiga: ", error);
+        }
     }
 
     let recBooks = await generateRecommendations(loggedInUserId);
-    recBooks = recBooks.split("###");
-    recBooks.pop(); // jer i zadnji element završi na ### pa će ostat prazni element na kraju
+    if (recBooks) {
+        recBooks = recBooks.split("###");
+        recBooks.pop(); // jer i zadnji element završi na ### pa će ostat prazni element na kraju
 
-    const recBooksTemp = [];
-    for (const recBookStr of recBooks) {
-        const recBook = await fetchBookByQuery(recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0]);
-        if (!recBook) continue;
-        console.log("Rezultat za " + recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0], recBook);
-        recBooksTemp.push(recBook);
+        const recBooksTemp = [];
+        for (const recBookStr of recBooks) {
+            const recBook = await fetchBookByQuery(recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0]);
+            if (!recBook) continue;
+            console.log("Rezultat za " + recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0], recBook);
+            recBooksTemp.push(recBook);
+        }
+        console.log(recommendedBooks.value)
+
+        recommendedBooks.value = recBooksTemp;
     }
-    console.log(recommendedBooks.value)
-
-    recommendedBooks.value = recBooksTemp;
+    
     loadingBooks.value = false;
 });
 

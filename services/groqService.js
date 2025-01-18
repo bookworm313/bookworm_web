@@ -9,6 +9,9 @@ const groq = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY, dangerouslyAl
 
 export async function generateRecommendations(loggedInUserId) {
     const doneReading = await getDoneReading(loggedInUserId);
+
+    if (!doneReading) return null;
+
     const bookIds = doneReading.booksOlid;
 
     let doneReadingBooks = [];
