@@ -57,3 +57,10 @@ input:hover {
   border: 1px solid var(--input_border) !important;
   background-color: var(--input_hover) !important;
 }
+
+.bookInfoDialog{
+  background: #ecdeaa;
+  position: fixed;
+  width: 50%;
+  height: 55%;
+}

@@ -1,7 +1,7 @@
 <template>
-    <div class="book" v-if="!isRemoved">
-        <div class="cover-container">
-            <img :src="props.coverUri" class="image" alt="No Cover" />
+    <div class="book" v-if="!isRemoved" >
+        <div class="cover-container" >
+            <img :src="props.coverUri" class="image" alt="No Cover" @click="showBookInfo()"/>
         </div>
         <div class="desc-container">
             <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
@@ -19,6 +19,16 @@
                 optionLabel="name" placeholder="Add to lists" :disabled="storing ? true : false" />
         </div>-->
     </div>
+    <Dialog v-model:visible="bookDialog" modal class="bookInfoDialog">
+        <div class="cover-container" >
+            <img :src="props.coverUri" class="image" alt="No Cover" />
+        </div>
+        <div class="desc-container">
+            <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
+            <h2 class="title">{{ props.title }}</h2>
+            <h3 class="subtitle">{{ props.subtitle }}</h3>
+        </div>
+    </Dialog>
 </template>
 
 <script setup>
@@ -64,6 +74,12 @@ async function removeFromList(listId, olid) {
 }
 
 
+const bookDialog = ref(false);
+
+const showBookInfo = () => {
+    bookDialog.value = true;
+}
+
 </script>
 
 <style scoped>
@@ -91,10 +107,6 @@ async function removeFromList(listId, olid) {
     justify-content: center;
     align-items: center;
     text-align: center;
-}
-
-.desc-container {
-    
 }
 
 .authors {
@@ -131,6 +143,11 @@ async function removeFromList(listId, olid) {
 
 .star {
     color: var(--gold);
+}
+
+.p-dialog .image{
+    width: auto;
+    height: auto;
 }
 
 </style>

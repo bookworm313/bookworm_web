@@ -1,7 +1,7 @@
 <template>
-    <div class="book">
-        <div class="cover-container">
-            <img :src="props.coverUri" class="image" alt="No Cover" />
+    <div class="book" >
+        <div class="cover-container" >
+            <img :src="props.coverUri" class="image" alt="No Cover" @click="showBookInfo()"/>
         </div>
         <div class="desc-container">
             <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
@@ -19,6 +19,17 @@
                 :selectedItemsLabel="'In ' + selectedLists?.length + ' lists'" />
         </div>
     </div>
+    <Dialog v-model:visible="bookDialog" modal class="bookInfoDialog"   >
+        <div class="cover-container" >
+            <img :src="props.coverUri" class="image" alt="No Cover"/>
+        </div>
+        <div class="desc-container">
+            <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
+            <h2 class="title">{{ props.title }}</h2>
+            <h3 class="subtitle">{{ props.subtitle }}</h3>
+        </div>
+
+    </Dialog>
 </template>
 
 <script setup>
@@ -49,6 +60,13 @@ const props = defineProps({
     coverUri: String,
     review: Number
 })
+
+const bookDialog = ref(false);
+
+const showBookInfo = () => {
+    bookDialog.value = true;
+}
+
 
 </script>
 
@@ -111,4 +129,8 @@ const props = defineProps({
     max-width: 200px;
 }
 
+.p-dialog .image{
+    width: auto;
+    height: auto;
+}
 </style>
