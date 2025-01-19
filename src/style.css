@@ -60,6 +60,7 @@ input:hover {
 
 .bookInfoDialog{
   position: fixed;
-  width: 60%;
+  align-items:flex;
+  width: 70%;
   height: 65%;
 }
