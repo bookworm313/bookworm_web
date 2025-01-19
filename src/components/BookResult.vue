@@ -28,7 +28,10 @@
             <h2 class="title">{{ props.title }}</h2>
             <h3 class="subtitle">{{ props.subtitle }}</h3>
         </div>
-
+        <!--<div class="review">
+            <span>{{ props.review }} </span>
+            <font-awesome-icon icon="star" class="icon star" />
+        </div>-->
     </Dialog>
 </template>
 

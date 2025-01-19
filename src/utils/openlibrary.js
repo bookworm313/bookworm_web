@@ -95,7 +95,7 @@ export async function fetchBooksByOLID(olids)
     return books;
 }
 
-/*export async function fetchBook(e_olid) {
+export async function fetchBook(e_olid) {
     const editionUri = `https://openlibrary.org/books/${e_olid}.json`;
     console.log("Edition uri: ", editionUri);
     const book = {
@@ -162,7 +162,7 @@ export async function fetchBooksByOLID(olids)
                 .catch(error => console.error('Error when fetching author:', error));
         }
     return book;
-}*/
+}
 
 // Dohvati podatke o autoru prema OLID-u autora
 async function fetchAuthorByOLID(a_olid)
