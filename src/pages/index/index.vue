@@ -3,15 +3,27 @@
         <h1>Discover</h1>
         <hr>
         <div class="discover">
+            <DiscoverCategory :is-new="true" :title="`We think you'll like these...`" :loading-books="loadingBooks" :books="recommendedBooksHistory">
+                <template v-slot:description>
+                    <p>Generated recommendations based on your <RouterLink class="link" to="/lists#done_reading">&nbsp;<font-awesome-icon :icon="'book-open'" /> Done Reading</RouterLink> list</p>
+                </template>
+            </DiscoverCategory>
+
+            <DiscoverCategory :is-new="true" :title="`A wild genre has appeared!`" :loading-books="loadingBooks" :books="recommendedBooksRandom">
+                <template v-slot:description>
+                    <p>Discover something new. Here are some <span class="highlight">{{ randomGenre }}</span> books.</p>
+                </template>
+                <template v-slot:genre-desc>
+                    <div class="genre-desc">
+                        <font-awesome-icon icon="info-circle" class="genre-desc-icon" />
+                        <p>{{ randomGenreDesc }}</p>
+                    </div>
+                </template>
+            </DiscoverCategory>
+
             <DiscoverCategory :is-new="false" :title="'Up next'" :loading-books="loadingBooks" :books="toReadBooks">
                 <template v-slot:description>
                     <p>From your <RouterLink class="link" to="/lists#want_to_read">&nbsp;<font-awesome-icon :icon="'book-bookmark'" /> Want To Read</RouterLink> list</p>
-                </template>
-            </DiscoverCategory>
-            
-            <DiscoverCategory :is-new="true" :title="`We think you'll like these...`" :loading-books="loadingBooks" :books="recommendedBooks">
-                <template v-slot:description>
-                    <p>Generated recommendations based on your <RouterLink class="link" to="/lists#done_reading">&nbsp;<font-awesome-icon :icon="'book-open'" /> Done Reading</RouterLink> list</p>
                 </template>
             </DiscoverCategory>
         </div>
@@ -20,19 +32,21 @@
 </template>
 
 <script setup>
-const loggedInUserId = 1;
 
-import { MultiSelect } from 'primevue';
+const loggedInUserId = 1;
 
 import DiscoverCategory from '../../components/DiscoverCategory.vue'
 
 import { onBeforeMount, ref } from 'vue';
 import { getWantToRead } from '../../../services/serverApi';
 import { fetchBooksByOLID, fetchBookByQuery } from '../../utils/openlibrary';
-import { generateRecommendations } from '../../../services/groqService';
+import { generateRecommendationsByHistory, generateRecommendationsRandom } from '../../../services/groqService';
 
 const toReadBooks = ref([{},{},{},{},{},{},{},{}]);
-const recommendedBooks = ref([{},{},{},{},{},{},{},{}]);
+const recommendedBooksHistory = ref([{},{},{},{},{},{},{},{}]);
+const recommendedBooksRandom = ref([{},{},{},{},{},{},{},{}]);
+const randomGenre = ref("");
+const randomGenreDesc = ref("");
 const loadingBooks = ref(true);
 
 onBeforeMount(async () => {
@@ -50,19 +64,38 @@ onBeforeMount(async () => {
         }
     }
 
-    let recBooks = await generateRecommendations(loggedInUserId);
-    if (recBooks) {
-        recBooks = recBooks.split("###");
-        recBooks.pop(); // jer i zadnji element završi na ### pa će ostat prazni element na kraju
+    let recBooksHistory = await generateRecommendationsByHistory(loggedInUserId);
+    if (recBooksHistory) {
+        recBooksHistory = recBooksHistory.split("###");
+        recBooksHistory.pop(); // jer i zadnji element završi na ### pa će ostat prazni element na kraju
 
         const recBooksTemp = [];
-        for (const recBookStr of recBooks) {
+        for (const recBookStr of recBooksHistory) {
             const recBook = await fetchBookByQuery(recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0]);
             if (!recBook) continue;
             recBooksTemp.push(recBook);
         }
 
-        recommendedBooks.value = recBooksTemp;
+        recommendedBooksHistory.value = recBooksTemp;
+    }
+
+    let recBooksRandom = await generateRecommendationsRandom();
+    console.log("INDEX Dobivene preporuke:\n" + recBooksRandom);
+    if (recBooksRandom) {
+        recBooksRandom = recBooksRandom.split("###");
+        const genre = recBooksRandom.shift().split(";;;");
+        randomGenre.value = genre[0];
+        randomGenreDesc.value = String(genre[1]).charAt(0).toUpperCase() + String(genre[1]).slice(1);
+        recBooksRandom.pop();
+
+        const recBooksTemp = [];
+        for (const recBookStr of recBooksRandom) {
+            const recBook = await fetchBookByQuery(recBookStr.split(";;;")[0] + " " + recBookStr.split(";;;")[1].split(', ')[0]);
+            if (!recBook) continue;
+            recBooksTemp.push(recBook);
+        }
+
+        recommendedBooksRandom.value = recBooksTemp;
     }
     
     loadingBooks.value = false;
@@ -120,10 +153,10 @@ hr {
     margin-bottom: 20px;
 }
 .discover-head p {
-    font-style: italic;
+    
 }
 
-.link {
+.link, .highlight {
     text-decoration: none;
     font-style: normal;
     color: #B60000;
@@ -150,48 +183,18 @@ hr {
     display: flex;
     justify-content: center;
 }
-.carousel-item {
-    width: 150px;
-    height: 250px;
-    display: flex;
-    align-items: center;
-    position: relative;
-    border-radius: 5px;
-}
-.carousel-item img {
-    width: 100%;
-    height: 100%; 
-    object-fit: cover;
-    z-index: 0;
-}
-.carousel-item-desc {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    padding: 20px;
 
+.genre-desc {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
+    justify-content: space-between;
     gap: 10px;
-    text-align: center;
-
-    color: rgba(255, 255, 255, 0);
-    backdrop-filter: blur(0px);
-    filter: brightness(1);
-    transition: color .5s, backdrop-filter .5s, brightness 1s;
 }
-.carousel-item:hover .carousel-item-desc {
-    color: rgba(255, 255, 255, 1);
-    backdrop-filter: blur(10px) brightness(0.5);
-    transition: color .5s, backdrop-filter .5s, brightness 1s;
+.genre-desc-icon {
+    margin-top: 4px;
 }
-.book-title {
-    font-size: 16px;
-}
-.book-authors {
-    font-size: 14px;
+.genre-desc p {
+    flex-grow: 1;
+    font-style: italic;
 }
 
 </style>

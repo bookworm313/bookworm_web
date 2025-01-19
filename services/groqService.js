@@ -7,7 +7,7 @@ import Groq from "groq-sdk";
 const groq = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY, dangerouslyAllowBrowser: true });
 
 
-export async function generateRecommendations(loggedInUserId) {
+export async function generateRecommendationsByHistory(loggedInUserId) {
     const doneReading = await getDoneReading(loggedInUserId);
 
     if (!doneReading) return null;
@@ -26,7 +26,7 @@ export async function generateRecommendations(loggedInUserId) {
             console.log("Poslani upit:\n" + booksString);
         } else return null;
 
-        const chatCompletion = await getGroqChatCompletion(booksString);
+        const chatCompletion = await getGroqChatCompletionHistory(booksString);
         const recommendString = chatCompletion.choices[0]?.message?.content || null;
         console.log("Dobivene preporuke:\n" + recommendString);
         
@@ -39,20 +39,60 @@ export async function generateRecommendations(loggedInUserId) {
     return null;
 }
 
-export async function getGroqChatCompletion(booksString) {
-
-    return groq.chat.completions.create({
+export async function generateRecommendationsRandom() {
   
+  try {
+    
+    const letter = String.fromCharCode(new Date().getMilliseconds() % 26 + 65);
+    console.log(letter)
+    const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
-          role: "user",
-          content: "Recommend me 10 books that you think I'd enjoy after having read the following books, listed in the format '<book title>;;; <authors seperated by commas>###':\n" + booksString + "and write the recommendations in the format '<book title>;;; <authors seperated by commas>###', without any additional notes.",
+          role: "system",
+          content: "You are a helpful assistant and write only what you were explicitly told to write.",
         },
-  
+        {
+          role: "user",
+          content: `
+          Recommend me 10 books in one genre determined in the next line, preferably written by different authors.
+          The first letter of the genre is ${letter}.
+          Write the recommendations in the format:
+          '<genre>;;; <short description of the genre>###'
+          '<book title>;;; <authors seperated by commas>###'
+          '<book title>;;; <authors seperated by commas>###'
+          ...
+          `,
+        },
       ],
-  
       model: "llama-3.3-70b-versatile",
-  
     });
-  
+    const recommendString = chatCompletion.choices[0]?.message?.content || null;
+
+    console.log("GROQ Dobivene preporuke:\n" + recommendString);
+    
+    return recommendString;
+
+  } catch (error) {
+      console.error("Greška kod dohvaćanja knjiga: ", error);
   }
+
+  return null;
+}
+
+export async function getGroqChatCompletionHistory(booksString) {
+
+  return groq.chat.completions.create({
+
+    messages: [
+      {
+        role: "user",
+        content: "Recommend me 10 books that you think I'd enjoy after having read the following books, listed in the format '<book title>;;; <authors seperated by commas>###':\n" + booksString + "and write the recommendations in the format '<book title>;;; <authors seperated by commas>###', without any additional notes.",
+      },
+
+    ],
+
+    model: "llama-3.3-70b-versatile",
+
+  });
+  
+}

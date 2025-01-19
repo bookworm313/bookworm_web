@@ -1,10 +1,14 @@
 <template>
 	<div class="discover-container">
 		<div class="discover-head">
-			<h1 class="">{{ props.title }}</h1>
-			<slot name="description"></slot>
+			<Skeleton v-if="props.loadingBooks" width="500px" height="48px"></Skeleton>
+			<h1 v-else>{{ props.title }}</h1>
+			<Skeleton v-if="props.loadingBooks" width="500px" height="24px"></Skeleton>
+			<slot v-else v-if="props.books.length > 0" name="description"></slot>
 		</div>
-		<div class="discover-content">
+
+		<Skeleton v-if="props.loadingBooks" width="100%" height="250px"></Skeleton>
+		<div v-else class="discover-content">
 			<Carousel v-if="props.loadingBooks || props.books.length > 0" :value="props.books" :num-visible="8" :numScroll="1" :showIndicators="false" >
 				<template #item="slotProps" :empty="" >
 					<div class="carousel-item-container">
@@ -22,6 +26,7 @@
 			</Carousel>
 			<div v-else>Add some books to the list and they'll show up here!</div>
 		</div>
+		<slot v-if="!props.loadingBooks" name="genre-desc"></slot>
 	</div>
 </template>
 
@@ -29,6 +34,7 @@
 
 import { ref } from 'vue';
 import BookDiscover from './BookDiscover.vue';
+import { Skeleton } from 'primevue';
 
 const props = defineProps({
     isNew: Boolean,
@@ -45,10 +51,6 @@ const noImage = ref(false);
 
 <style scoped>
 
-.discover-head {
-    /*margin-left: calc(var(--p-carousel-content-gap) + 38px);*/
-    margin-bottom: 20px;
-}
 .discover-head p {
     font-style: italic;
 }
@@ -79,6 +81,15 @@ const noImage = ref(false);
     width: 100%;
     display: flex;
     justify-content: center;
+}
+
+.discover-content {
+    margin: 20px 0;
+}
+
+.p-skeleton {
+	background-color: var(--bg);
+	margin-bottom: 10px;
 }
 
 </style>

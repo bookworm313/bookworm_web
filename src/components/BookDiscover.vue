@@ -57,6 +57,7 @@ watch(() => props.bookData, async () => {
     align-items: center;
     position: relative;
     border-radius: 5px;
+    background-color: var(--bg);
 }
 .carousel-item img {
     width: 100%;
