@@ -59,8 +59,7 @@ input:hover {
 }
 
 .bookInfoDialog{
-  background: #ecdeaa;
   position: fixed;
-  width: 50%;
-  height: 55%;
+  width: 60%;
+  height: 65%;
 }

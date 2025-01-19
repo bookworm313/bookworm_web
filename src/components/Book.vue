@@ -19,7 +19,7 @@
                 optionLabel="name" placeholder="Add to lists" :disabled="storing ? true : false" />
         </div>-->
     </div>
-    <Dialog v-model:visible="bookDialog" modal class="bookInfoDialog">
+    <Dialog v-model:visible="bookDialog" modal class="bookInfoDialog" :style="{background:'#ecdeaa', border: 'none'}">
         <div class="cover-container" >
             <img :src="props.coverUri" class="image" alt="No Cover" />
         </div>

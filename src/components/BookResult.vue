@@ -19,9 +19,9 @@
                 :selectedItemsLabel="'In ' + selectedLists?.length + ' lists'" />
         </div>
     </div>
-    <Dialog v-model:visible="bookDialog" modal class="bookInfoDialog"   >
+    <Dialog v-model:visible="bookDialog" modal class="bookInfoDialog" :style="{background:'#ecdeaa', border: 'none'}">
         <div class="cover-container" >
-            <img :src="props.coverUri" class="image" alt="No Cover"/>
+            <img :src="props.coverUri" class="image" alt="No Cover" />
         </div>
         <div class="desc-container">
             <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
