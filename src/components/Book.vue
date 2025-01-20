@@ -30,17 +30,33 @@
                 optionLabel="name" placeholder="Add to lists" :disabled="storing ? true : false" />
         </div>-->
     </div>
-    <Dialog v-model:visible="bookDialog" modal class="bookInfoDialog" :style="{background:'#ecdeaa', border: 'none'}">
-        <img :src="Book?.edition?.cover_uri" alt="No Cover" v-if="Book.edition?.cover_uri">
-        <h1>{{ Book?.title }}</h1>
-        <h2>{{ Book?.subtitle }}</h2>
-        <h3 @click = "showAuthorInfo()">{{ Book?.authors?.name}}</h3>
-        <div id="authorInfo">
-            <p>DOB: {{ Book?.authors?.birth_date || "Unknown"}}</p>
-            <p>{{ Book?.authors?.bio }}</p>
+    
+    <Dialog v-model:visible="dialogIsVisible" modal :style="{background:'#ecdeaa', border: 'none', width: '50%', height: '70%'}">
+        <div class="dialog-container">
+            <div class="dialog-side">
+                <div class="dialog-side-content">
+                    <Skeleton v-if="!Book" width="200px" height="300px"></Skeleton>
+                    <img v-else :src="props.coverUri" alt="No Cover">
+                    <Skeleton v-if="!Book" width="200px" height="20px" style="margin-top: 10px"></Skeleton>
+                    <p v-else>Publish date: {{ Book?.edition?.publish_date || "unknown" }}</p>
+                </div>
+            </div>
+            <div class="dialog-main">
+                <Skeleton v-if="!Book" width="100%" height="30px"></Skeleton>
+                <h2 v-else>{{ Book?.authors.map((author) => author.name).join(", ")}}</h2>
+                <Skeleton v-if="!Book" width="100%" height="50px" style="margin-top: 10px"></Skeleton>
+                <h1 v-else>{{ Book?.title }}</h1>
+                <Skeleton v-if="!Book" width="100%" height="30px" style="margin-top: 10px"></Skeleton>
+                <h2 v-else>{{ Book?.subtitle }}</h2>
+                <Skeleton v-if="!Book" width="100%" height="300px" style="margin-top: 10px"></Skeleton>
+                <p v-else>{{ Book?.description || "No description available"}}</p>
+                <div v-for="author in Book?.authors" class="author-info">
+                    <h3>About {{ author.name }}</h3>
+                    <p>Born: {{ author.birth_date || "unknown"}}</p>
+                    <p>{{ author.bio }}</p>
+                </div>
+            </div>
         </div>
-        <h3>{{ Book?.edition?.title }}, {{ Book?.edition?.publisher || "Unknown publisher" }}, {{ Book?.edition?.publish_date }}</h3>   
-        <p>{{ Book?.description || "Missing description"}}</p>
     </Dialog>
 </template>
 
@@ -49,6 +65,7 @@ const loggedInUserId = 1;
 
 import { onBeforeMount, ref, onMounted, defineProps, watch } from 'vue';
 import { useUserStore } from '../../store/user';
+import { Skeleton } from 'primevue';
 import { removeBookFromList } from '../../services/serverApi';
 import { fetchBook } from '../utils/openlibrary';
 
@@ -153,21 +170,12 @@ async function removeFromList(listId, olid) {
     await removeBookFromList(loggedInUserId, listId, olid);
     isRemoved.value = true;
 }
-const Book = ref(null);  
-const bookDialog = ref(false);
 
-//Shows dialog box and fetches book data from fetchBook()
-const showBookInfo = async () => {
-    Book.value = await fetchBook(props.olid);      
-    bookDialog.value = true;
-}
-const showAuthorInfo= () => {
-  var x = document.getElementById("authorInfo");
-  if (x.style.display === "none") {
-    x.style.display = "block    ";
-  } else {
-    x.style.display = "none";
-  }
+const Book = ref(null);  
+const dialogIsVisible = ref(false);
+const showBookInfo = async () => {  
+    dialogIsVisible.value = true;
+    Book.value = await fetchBook(props.olid); 
 }
 </script>
 
@@ -244,5 +252,33 @@ const showAuthorInfo= () => {
     width: auto;
     height: auto;
 }
+
+
+.dialog-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0 10px;
+}
+.dialog-side {
+    position: relative;
+    min-width: 200px;
+    max-width: 200px;
+}
+.dialog-side-content {
+    width: 200px;
+    position: fixed;
+}
+.dialog-side-content img {
+    width: 100%;
+}
+.author-info {
+    margin-top: 10px;
+}
+.dialog-main {
+    flex-grow: 1;
+}
+
+
 
 </style>
