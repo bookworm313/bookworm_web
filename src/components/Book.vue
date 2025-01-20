@@ -7,7 +7,18 @@
             <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
             <h2 class="title">{{ props.title }}</h2>
             <h3 class="subtitle">{{ props.subtitle }}</h3>
+            <!-- Rating Stars -->
+            <div v-if="isPageDoneReading" class="rating">
+                <font-awesome-icon
+                    v-for="n in 5"
+                    :key="n"
+                    :icon="[n <= currentReview ? 'fas' : 'far', 'star']"
+                    class="icon star"
+                    @click="toggleReview(n)"
+                />
+            </div>
         </div>
+        
         <!-- <div class="progress"></div> -->
         <div>
             <font-awesome-icon icon="trash" class="icon trash" size="lg" @click="removeFromList(props.listId, props.olid)" />
@@ -36,7 +47,7 @@
 <script setup>
 const loggedInUserId = 1;
 
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref, onMounted, defineProps, watch } from 'vue';
 import { useUserStore } from '../../store/user';
 import { removeBookFromList } from '../../services/serverApi';
 import { fetchBook } from '../utils/openlibrary';
@@ -46,6 +57,8 @@ const selectedLists = ref(null);
 const storing = ref(false);
 
 const isRemoved = ref(false);
+
+const isPageDoneReading = ref(false);
 
 const coverLoaded = ref(true);
 function coverNotFound() {
@@ -60,14 +73,80 @@ const props = defineProps({
     authorNames: Array,
     publishYear: [Number, String],
     coverUri: String,
-    review: Number
+    review: {
+        type: Number,
+        default: 0, 
+    },
 })
+
+// Lokalna varijabla za pohranu trenutne ocjene
+const currentReview = ref(0);
+
+// Praćenje promjena u props.review
+watch(() => props.review, (newValue) => {
+  currentReview.value = newValue;  // Ažurirajte lokalnu ocjenu kad se promijeni review
+});
+
+const toggleReview = (value) => {
+  if (currentReview.value === value) {
+    // Ako je već odabrano, resetiraj ocjenu
+    currentReview.value = 0;
+    console.log('Ocjena uklonjena');
+  } else {
+    // Postavi novu ocjenu
+    currentReview.value = value;
+    console.log(`Odabrana ocjena: ${value}`);
+  }
+  try {
+    const url = 'http://localhost:3000/review';
+    const data = {
+        bookOlid: props.olid,
+        review: currentReview.value
+    }
+    console.log(data);
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(data => {
+        console.log(data);
+    })
+    .catch(error => {
+        console.error(error);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 onBeforeMount(() => {
     selectedLists.value = userStore.lists.filter((list) => {
         //console.log(list + " includes " + props.olid + ": " + list.books_olid.split(",").includes(props.olid))
         return list.books_olid.split(",").includes(props.olid)
     });
+})
+
+onMounted(async () => {
+    //check if the # in url is '#done_reading' and set isPageDoneReading to true
+    if (window.location.hash == "#done_reading") {
+        isPageDoneReading.value = true;
+
+        try {
+            console.log("OLID: ", props.olid)
+            const url = 'http://localhost:3000/review/' + props.olid;
+            const response = await fetch(url);
+            const data = await response.json();
+            console.log(data);
+            if(data[0]?.stars) { currentReview.value = data[0].stars;}
+        } catch (error) {
+            console.error(error);
+        }
+
+    }
 })
 
 async function removeFromList(listId, olid) {

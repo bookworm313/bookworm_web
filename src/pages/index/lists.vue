@@ -2,7 +2,7 @@
     <div class="lists">
         <div class="h1-header">
             <h1>{{ listName }}</h1>
-            <Button class="p-button" label="Add book" icon="pi pi-plus" @click="isDialogVisible = true" />
+            <!-- <Button class="p-button" label="Add book" icon="pi pi-plus" @click="isDialogVisible = true" /> -->
         </div>
         <hr>
         <div class="books">
