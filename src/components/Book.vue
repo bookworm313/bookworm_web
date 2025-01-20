@@ -58,7 +58,7 @@
                 </div>
                 <div class="rating">
                     <font-awesome-icon v-for="n in 5" :key="n" :icon="[n <= currentReview ? 'fas' : 'far', 'star']"
-                    class="icon star" @click="isPageDoneReading ? toggleReview(n) : ''" />
+                        class="icon star" @click="isPageDoneReading ? toggleReview(n) : ''" />
                 </div>
             </div>
         </div>
@@ -121,9 +121,11 @@ const toggleReview = (value) => {
     }
     try {
         const url = 'http://localhost:3000/review';
+        const user = JSON.parse(localStorage.getItem("user"))
         const data = {
             bookOlid: props.olid,
-            review: currentReview.value
+            review: currentReview.value,
+            userId: user?.id
         }
         console.log(data);
 
@@ -158,8 +160,10 @@ onMounted(async () => {
         isPageDoneReading.value = true;
     }
     try {
+        const user = JSON.parse(localStorage.getItem("user"))
         console.log("OLID: ", props.olid)
-        const url = 'http://localhost:3000/review/' + props.olid;
+        console.log("USER: ", user?.id)
+        const url = 'http://localhost:3000/review/' + props.olid + '/' + user?.id;
         const response = await fetch(url);
         const data = await response.json();
         console.log(data);
