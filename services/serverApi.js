@@ -123,3 +123,25 @@ export const removeBookFromList = async (loggedInUserId, listId, olid) => {
         console.error(error);
     }
 }
+
+const API_URL = 'http://localhost:3000';
+
+// Login function
+export const login = async (credentials) => {
+    try {
+        const response = await axios.post(`${API_URL}/login`, credentials);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+// Signup function
+export const signup = async (userData) => {
+    try {
+        const response = await axios.post(`${API_URL}/signup`, userData);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
