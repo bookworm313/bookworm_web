@@ -1,7 +1,7 @@
 <template>
-    <div class="book" >
-        <div class="cover-container" >
-            <img :src="props.coverUri" class="image" alt="No Cover" @click="showBookInfo()"/>
+    <div class="book">
+        <div class="cover-container">
+            <img :src="props.coverUri" class="image" alt="No Cover" @click="showBookInfo()" />
         </div>
         <div class="desc-container">
             <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
@@ -9,17 +9,13 @@
             <h3 class="subtitle">{{ props.subtitle }}</h3>
         </div>
         <div class="options-container">
-            <MultiSelect class="list-select"
-                v-model="selectedLists"
-                @before-hide="updateLists()"
-                :options="lists"
-                optionLabel="name"
-                placeholder="Add to list"
-                :maxSelectedLabels="1"
+            <MultiSelect class="list-select" v-model="selectedLists" @before-hide="updateLists()" :options="lists"
+                optionLabel="name" placeholder="Add to list" :maxSelectedLabels="1"
                 :selectedItemsLabel="'In ' + selectedLists?.length + ' lists'" />
         </div>
     </div>
-    <Dialog v-model:visible="dialogIsVisible" modal :style="{background:'#ecdeaa', border: 'none', width: '50%', height: '70%'}">
+    <Dialog v-model:visible="dialogIsVisible" modal
+        :style="{ background: '#ecdeaa', border: 'none', width: '50%', height: '70%' }">
         <div class="dialog-container">
             <div class="dialog-side">
                 <div class="dialog-side-content">
@@ -31,16 +27,16 @@
             </div>
             <div class="dialog-main">
                 <Skeleton v-if="!Book" width="100%" height="30px"></Skeleton>
-                <h2 v-else>{{ Book?.authors.map((author) => author.name).join(", ")}}</h2>
+                <h2 v-else>{{ Book?.authors.map((author) => author.name).join(", ") }}</h2>
                 <Skeleton v-if="!Book" width="100%" height="50px" style="margin-top: 10px"></Skeleton>
                 <h1 v-else>{{ Book?.title }}</h1>
                 <Skeleton v-if="!Book" width="100%" height="30px" style="margin-top: 10px"></Skeleton>
                 <h2 v-else>{{ Book?.subtitle }}</h2>
                 <Skeleton v-if="!Book" width="100%" height="300px" style="margin-top: 10px"></Skeleton>
-                <p v-else>{{ Book?.description || "No description available"}}</p>
+                <p v-else>{{ Book?.description || "No description available" }}</p>
                 <div v-for="author in Book?.authors" class="author-info">
                     <h3>About {{ author.name }}</h3>
-                    <p>Born: {{ author.birth_date || "unknown"}}</p>
+                    <p>Born: {{ author.birth_date || "unknown" }}</p>
                     <p>{{ author.bio }}</p>
                 </div>
             </div>
@@ -49,12 +45,16 @@
 </template>
 
 <script setup>
-const loggedInUserId = 1;
 
 import { computed, onBeforeMount, ref } from 'vue';
 import { MultiSelect, Skeleton } from 'primevue';
 import { getUserLists, updateBookBelonging } from '../../services/serverApi';
 import { fetchBook } from '../utils/openlibrary';
+
+const user = JSON.parse(localStorage.getItem("user"))
+const loggedInUserId = user?.id;
+
+console.log("USER: ", user?.id)
 
 const lists = ref([]);
 const selectedLists = ref(null);
@@ -78,11 +78,11 @@ const props = defineProps({
     review: Number
 })
 
-const Book = ref(null);  
+const Book = ref(null);
 const dialogIsVisible = ref(false);
-const showBookInfo = async () => {  
+const showBookInfo = async () => {
     dialogIsVisible.value = true;
-    Book.value = await fetchBook(props.olid); 
+    Book.value = await fetchBook(props.olid);
 }
 </script>
 
@@ -116,9 +116,11 @@ const showBookInfo = async () => {
 .authors {
     font-size: 16px;
 }
+
 .title {
     font-size: 22px;
 }
+
 .subtitle {
     font-size: 18px;
     font-style: italic;
@@ -145,7 +147,7 @@ const showBookInfo = async () => {
     max-width: 200px;
 }
 
-.p-dialog .image{
+.p-dialog .image {
     width: auto;
     height: auto;
 }
@@ -157,24 +159,27 @@ const showBookInfo = async () => {
     gap: 20px;
     padding: 0 10px;
 }
+
 .dialog-side {
     position: relative;
     min-width: 200px;
     max-width: 200px;
 }
+
 .dialog-side-content {
     width: 200px;
     position: fixed;
 }
+
 .dialog-side-content img {
     width: 100%;
 }
+
 .author-info {
     margin-top: 10px;
 }
+
 .dialog-main {
     flex-grow: 1;
 }
-
-
 </style>
