@@ -55,6 +55,15 @@
                     <p>Born: {{ author.birth_date || "unknown"}}</p>
                     <p>{{ author.bio }}</p>
                 </div>
+                <div v-if="isPageDoneReading" class="rating">
+                <font-awesome-icon
+                    v-for="n in 5"
+                    :key="n"
+                    :icon="[n <= currentReview ? 'fas' : 'far', 'star']"
+                    class="icon star"
+                    @click="toggleReview(n)"
+                />
+            </div>
             </div>
         </div>
     </Dialog>
