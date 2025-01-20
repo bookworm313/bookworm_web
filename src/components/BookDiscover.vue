@@ -2,7 +2,7 @@
     <div class="carousel-item">
 		<Skeleton v-if="!props.bookData.cover_uri" width="200px" height="333px"></Skeleton>
 		<img v-else :src="props.bookData.cover_uri" @error="console.log('NO IMAGE', props.bookData.olid)" >
-		<div class="carousel-item-desc">
+		<div class="carousel-item-desc" @click="showBookInfo()">
 			<p class="book-authors">{{ props.bookData.authors?.join(',') }}</p>
 			<p class="book-title">{{ props.bookData.title }}</p>
 			<MultiSelect v-if="props.isNew"
@@ -16,6 +16,29 @@
 				<p v-else>{{ (props.bookData.publish_year) ? ("(" + props.bookData.publish_year + ")") : ("&nbsp;") }}</p>
 		</div>
 	</div>
+
+    <Dialog v-model:visible="dialogIsVisible" modal :style="{background:'#ecdeaa', border: 'none', width: '50%', height: '70%'}">
+        <div class="dialog-container">
+            <div class="dialog-side">
+                <div class="dialog-side-content">
+                    <img :src="props.bookData.cover_uri" alt="No Cover">
+                    <p>Publisher: {{ Book?.edition?.publisher || "unknown" }}</p>
+                    <p>Publish year: {{ Book?.edition?.publish_date || "unknown" }}</p>
+                </div>
+            </div>
+            <div class="dialog-main">
+                <h2>{{ Book?.authors.map((author) => author.name).join(", ")}}</h2>
+                <h1>{{ Book?.title }}</h1>
+                <h2>{{ Book?.subtitle }}</h2>   
+                <p>{{ Book?.description || "Missing description"}}</p>
+                <div class="author-info">
+                    <h3>About the author</h3>
+                    <p>Born: {{ Book?.authors[0].birth_date || "unknown"}}</p>
+                    <p>{{ Book?.authors[0].bio }}</p>
+                </div>
+            </div>
+        </div>
+    </Dialog>
 </template>
 
 <script setup>
@@ -24,6 +47,7 @@ const loggedInUserId = 1;
 import { computed, onBeforeMount, ref, watch } from 'vue';
 import MultiSelect from 'primevue/multiselect';
 import { getUserLists, updateBookBelonging } from '../../services/serverApi';
+import { fetchBook } from '../utils/openlibrary';
 
 const props = defineProps({
 	isNew: Boolean,
@@ -45,6 +69,15 @@ async function updateLists() {
 watch(() => props.bookData, async () => {
 	selectedLists.value = lists.value.filter((list) => list.booksOlid.includes(props.bookData.olid));
 })
+
+
+const Book = ref(null);  
+const dialogIsVisible = ref(false);
+const showBookInfo = async () => {
+    console.log("fetching")
+    Book.value = await fetchBook(props.bookData.olid);      
+    dialogIsVisible.value = true;
+}
 
 </script>
 
@@ -97,6 +130,7 @@ watch(() => props.bookData, async () => {
 	-webkit-line-clamp: 3; /* number of lines to show */
     		line-clamp: 3; 
 	-webkit-box-orient: vertical;
+    user-select: none;
 }
 .book-authors {
     font-size: 14px;
@@ -105,6 +139,7 @@ watch(() => props.bookData, async () => {
 	-webkit-line-clamp: 2; /* number of lines to show */
     		line-clamp: 2; 
 	-webkit-box-orient: vertical;
+    user-select: none;
 }
 
 .p-multiselect {
@@ -113,6 +148,22 @@ watch(() => props.bookData, async () => {
 }
 .carousel-item:hover .p-multiselect {
     visibility: visible;
+}
+
+.dialog-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 0 10px;
+}
+.dialog-side {
+    position: relative;
+    min-width: 200px;
+    max-width: 200px;
+}
+.dialog-side-content {
+    width: 200px;
+    position: fixed;
 }
 
 

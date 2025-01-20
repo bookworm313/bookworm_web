@@ -112,11 +112,11 @@ export async function fetchBook(e_olid) {
             publish_date: null,
             cover_uri: null,
         },
-        authors: {
-            name: null,
+        authors: [
+            /*name: null,
             birth_date: null,
-            bio: null,
-        }
+            bio: null,*/
+        ]
     }
     await fetch(editionUri)
         .then(response => response.json())
@@ -157,9 +157,12 @@ export async function fetchBook(e_olid) {
             await fetch(authorUri)
                 .then(response => response.json())
                 .then(data => {
-                        book.authors.name = data.name,
-                        book.authors.birth_date = data.birth_date,
-                        book.authors.bio = data.bio
+                    const author = {
+                        name: data.name,
+                        birth_date: data.birth_date,
+                        bio: data.bio
+                    }
+                    book.authors.push(author)
                 })
                 .catch(error => console.error('Error when fetching author:', error));
         }
