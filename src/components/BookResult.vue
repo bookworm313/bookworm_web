@@ -1,7 +1,7 @@
 <template>
-    <div class="book">
-        <div class="cover-container">
-            <img :src="props.coverUri" class="image" alt="No Cover" />
+    <div class="book" >
+        <div class="cover-container" >
+            <img :src="props.coverUri" class="image" alt="No Cover" @click="showBookInfo()"/>
         </div>
         <div class="desc-container">
             <h3 class="authors">{{ props.authorNames?.join(", ") }} ({{ props.publishYear }})</h3>
@@ -19,6 +19,18 @@
                 :selectedItemsLabel="'In ' + selectedLists?.length + ' lists'" />
         </div>
     </div>
+    <Dialog v-model:visible="bookDialog" modal class="bookInfoDialog" :style="{background:'#ecdeaa', border: 'none'}">
+        <img :src="Book?.edition?.cover_uri" alt="No Cover" v-if="Book.edition?.cover_uri">
+        <h1>{{ Book?.title }}</h1>
+        <h2>{{ Book?.subtitle }}</h2>
+        <h3>{{ Book?.authors?.name}}</h3>
+        <div id="authorInfo">
+            <p>DOB: {{ Book?.authors?.birth_date || "Unknown"}}</p>
+            <p hidden>{{ Book?.authors?.bio }}</p>
+        </div>
+        <h3>{{ Book.edition?.title }}, {{ Book.edition?.publisher || "Unknown publisher" }}, {{ Book?.edition?.publish_date }}</h3>   
+        <p>{{ Book?.description || "Missing description"}}</p>
+    </Dialog>
 </template>
 
 <script setup>
@@ -27,6 +39,7 @@ const loggedInUserId = 1;
 import { computed, onBeforeMount, ref } from 'vue';
 import MultiSelect from 'primevue/multiselect';
 import { getUserLists, updateBookBelonging } from '../../services/serverApi';
+import { fetchBook } from '../utils/openlibrary';
 
 const lists = ref([]);
 const selectedLists = ref(null);
@@ -50,6 +63,22 @@ const props = defineProps({
     review: Number
 })
 
+const Book = ref(null);  
+const bookDialog = ref(false);
+
+//Shows dialog box and fetches book data from fetchBook()
+const showBookInfo = async () => {
+    Book.value = await fetchBook(props.olid);      
+    bookDialog.value = true;
+}
+const showAuthorInfo= () => {
+  var x = document.getElementById("authorInfo");
+  if (x.style.display === "none") {
+    x.style.display = "block    ";
+  } else {
+    x.style.display = "none";
+  }
+}
 </script>
 
 <style scoped>
@@ -111,4 +140,8 @@ const props = defineProps({
     max-width: 200px;
 }
 
+.p-dialog .image{
+    width: auto;
+    height: auto;
+}
 </style>

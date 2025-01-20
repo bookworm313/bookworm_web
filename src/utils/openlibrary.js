@@ -97,9 +97,9 @@ export async function fetchBooksByOLID(olids)
     return books;
 }
 
-/*export async function fetchBook(e_olid) {
+export async function fetchBook(e_olid) {
     const editionUri = `https://openlibrary.org/books/${e_olid}.json`;
-    console.log("Edition uri: ", editionUri);
+    //console.log("Edition uri: ", editionUri);
     const book = {
         w_olid: null,
         e_olid: e_olid,
@@ -112,7 +112,11 @@ export async function fetchBooksByOLID(olids)
             publish_date: null,
             cover_uri: null,
         },
-        authors: []
+        authors: {
+            name: null,
+            birth_date: null,
+            bio: null,
+        }
     }
     await fetch(editionUri)
         .then(response => response.json())
@@ -124,12 +128,12 @@ export async function fetchBooksByOLID(olids)
             book.edition.publish_date = data.publish_date;
             book.edition.cover_uri = getCoverURI(data.covers?.[0], "M");
 
-            console.log(book);
+            //console.log(book);
         })
         .catch(error => console.error('Error when fetching edition:', error));
 
         const workUri = `https://openlibrary.org${book.w_olid.key}.json`;
-        console.log("Work uri: ", workUri);
+        //console.log("Work uri: ", workUri);
         await fetch(workUri)
             .then(response => response.json())
             .then(data => {
@@ -143,28 +147,24 @@ export async function fetchBooksByOLID(olids)
                 });
             })
             .catch(error => console.error('Error when fetching work:', error));
-        console.log(book.a_olid)
-        console.log(book)
+        //console.log(book.a_olid)
+        //console.log(book)
 
         for (const a_olid of book.a_olid) {
             const authorUri = `https://openlibrary.org${a_olid}.json`
-            console.log("Author uri: ", authorUri);
-            console.log(authorUri)
+            //console.log("Author uri: ", authorUri);
+            //console.log(authorUri)
             await fetch(authorUri)
                 .then(response => response.json())
                 .then(data => {
-                    const author = {
-                        name: data.name,
-                        birth_date: data.birth_date,
-                        death_date: data.death_date,
-                        bio: data.bio,
-                    }
-                    book.authors.push(author);
+                        book.authors.name = data.name,
+                        book.authors.birth_date = data.birth_date,
+                        book.authors.bio = data.bio
                 })
                 .catch(error => console.error('Error when fetching author:', error));
         }
     return book;
-}*/
+}
 
 // Dohvati podatke o autoru prema OLID-u autora
 async function fetchAuthorByOLID(a_olid)
