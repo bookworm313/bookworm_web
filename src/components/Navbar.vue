@@ -12,7 +12,7 @@
             <div class="options">
                 <Button icon="pi pi-plus" label="Test" @click="showAddListDialog()" />
                 <div class="icons">
-                    <font-awesome-icon class="icon" icon="user-gear" size="lg" />
+                    <font-awesome-icon class="icon" icon="arrow-right-from-bracket" size="lg" @click="logout()" />
                 </div>
             </div>
         </div>
@@ -77,6 +77,12 @@ const listIsVisible = ref(false);
 const showAddListDialog = () => {
     dialogVisible.value = true;
 }
+
+const logout = () => {
+    localStorage.removeItem("user");
+    router.push("/login");
+}
+
 </script>
 
 
@@ -90,6 +96,7 @@ section {
     background-color: var(--primary);
     box-shadow: 0 5px 10px rgba(168, 172, 187, 0.05), 0 5px 20px rgba(177, 181, 197, 0.2);
 }
+
 .nav-content {
     width: auto;
     display: flex;
@@ -105,10 +112,15 @@ section {
     justify-content: center;
     align-items: center;
 }
+
 .logo {
     width: 198px;
     height: 54px;
     object-fit: contain;
+}
+
+.icon {
+    color: red;
 }
 
 .icon:hover {
