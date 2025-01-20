@@ -80,14 +80,16 @@ export async function fetchBooksByOLID(olids)
         .then(data => {
             for (const olid in data) {
                 const book = data[olid];
+                console.log(book)
                 books.push({
                     olid: keyToOLID(book.key),
                     title: book.title,
                     subtitle: book.subtitle ? String(book.subtitle).charAt(0).toUpperCase() + String(book.subtitle).slice(1) : undefined,
-                    publish_year: getYearFromDate(book.publish_date?.[0]),
+                    publish_year: getYearFromDate(book.publish_date),
                     authors: book.authors?.map((author) => author.name),
                     cover_uri: getCoverURIByOLID(keyToOLID(book.key), "M")
                 })
+                console.log(olid, book.title, book.publish_date, new Date(book.publish_date).getFullYear())
             }
         })
         .catch(error => console.error('Greška pri dohvaćanju knjiga (fetchBooksByOLID):', error));
