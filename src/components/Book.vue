@@ -39,6 +39,15 @@
                     <img v-else :src="props.coverUri" alt="No Cover">
                     <Skeleton v-if="!Book" width="200px" height="20px" style="margin-top: 10px"></Skeleton>
                     <p v-else>Publish date: {{ Book?.edition?.publish_date || "unknown" }}</p>
+                    <div v-if="isPageDoneReading && Book" class="rating">
+                    <font-awesome-icon
+                        v-for="n in 5"
+                        :key="n"
+                        :icon="[n <= currentReview ? 'fas' : 'far', 'star']"
+                        class="icon star"
+                        @click="toggleReview(n)"
+                    />
+                </div>
                 </div>
             </div>
             <div class="dialog-main">
@@ -55,15 +64,7 @@
                     <p>Born: {{ author.birth_date || "unknown"}}</p>
                     <p>{{ author.bio }}</p>
                 </div>
-                <div v-if="isPageDoneReading" class="rating">
-                <font-awesome-icon
-                    v-for="n in 5"
-                    :key="n"
-                    :icon="[n <= currentReview ? 'fas' : 'far', 'star']"
-                    class="icon star"
-                    @click="toggleReview(n)"
-                />
-            </div>
+                
             </div>
         </div>
     </Dialog>
