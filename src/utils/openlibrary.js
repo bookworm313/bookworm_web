@@ -139,7 +139,7 @@ export async function fetchBook(e_olid) {
             .then(data => {
                 book.title = data.title;
                 book.description = data.description?.value || data.description;
-                if (!book.a_olid) book.a_olid = data.authors.map((author) => {
+                book.a_olid = data.authors.map((author) => {
                     if (Object.hasOwn(author, 'author'))
                         return author.author.key;
                     else
@@ -150,6 +150,7 @@ export async function fetchBook(e_olid) {
         //console.log(book.a_olid)
         //console.log(book)
 
+        console.log(book.a_olid)
         for (const a_olid of book.a_olid) {
             const authorUri = `https://openlibrary.org${a_olid}.json`
             //console.log("Author uri: ", authorUri);

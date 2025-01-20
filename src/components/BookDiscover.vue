@@ -2,9 +2,9 @@
     <div class="carousel-item">
 		<Skeleton v-if="!props.bookData.cover_uri" width="200px" height="333px"></Skeleton>
 		<img v-else :src="props.bookData.cover_uri" @error="console.log('NO IMAGE', props.bookData.olid)" >
-		<div class="carousel-item-desc" @click="showBookInfo()">
-			<p class="book-authors">{{ props.bookData.authors?.join(',') }}</p>
-			<p class="book-title">{{ props.bookData.title }}</p>
+		<div class="carousel-item-desc">
+			<p class="book-authors">{{ props.bookData.authors?.join(', ') }}</p>
+			<p class="book-title"  @click="showBookInfo()">{{ props.bookData.title }}</p>
 			<MultiSelect v-if="props.isNew"
 				v-model="selectedLists"
 				@before-hide="updateLists()"
@@ -21,20 +21,25 @@
         <div class="dialog-container">
             <div class="dialog-side">
                 <div class="dialog-side-content">
-                    <img :src="props.bookData.cover_uri" alt="No Cover">
-                    <p>Publisher: {{ Book?.edition?.publisher || "unknown" }}</p>
-                    <p>Publish year: {{ Book?.edition?.publish_date || "unknown" }}</p>
+                    <Skeleton v-if="!Book" width="200px" height="300px"></Skeleton>
+                    <img v-else :src="props.bookData.cover_uri" alt="No Cover">
+                    <Skeleton v-if="!Book" width="200px" height="20px" style="margin-top: 10px"></Skeleton>
+                    <p v-else>Publish date: {{ Book?.edition?.publish_date || "unknown" }}</p>
                 </div>
             </div>
             <div class="dialog-main">
-                <h2>{{ Book?.authors.map((author) => author.name).join(", ")}}</h2>
-                <h1>{{ Book?.title }}</h1>
-                <h2>{{ Book?.subtitle }}</h2>   
-                <p>{{ Book?.description || "Missing description"}}</p>
-                <div class="author-info">
-                    <h3>About the author</h3>
-                    <p>Born: {{ Book?.authors[0].birth_date || "unknown"}}</p>
-                    <p>{{ Book?.authors[0].bio }}</p>
+                <Skeleton v-if="!Book" width="100%" height="30px"></Skeleton>
+                <h2 v-else>{{ Book?.authors.map((author) => author.name).join(", ")}}</h2>
+                <Skeleton v-if="!Book" width="100%" height="50px" style="margin-top: 10px"></Skeleton>
+                <h1 v-else>{{ Book?.title }}</h1>
+                <Skeleton v-if="!Book" width="100%" height="30px" style="margin-top: 10px"></Skeleton>
+                <h2 v-else>{{ Book?.subtitle }}</h2>
+                <Skeleton v-if="!Book" width="100%" height="300px" style="margin-top: 10px"></Skeleton>
+                <p v-else>{{ Book?.description || "No description available"}}</p>
+                <div v-for="author in Book?.authors" class="author-info">
+                    <h3>About {{ author.name }}</h3>
+                    <p>Born: {{ author.birth_date || "unknown"}}</p>
+                    <p>{{ author.bio }}</p>
                 </div>
             </div>
         </div>
@@ -45,7 +50,7 @@
 const loggedInUserId = 1;
 
 import { computed, onBeforeMount, ref, watch } from 'vue';
-import MultiSelect from 'primevue/multiselect';
+import { MultiSelect, Skeleton } from 'primevue';
 import { getUserLists, updateBookBelonging } from '../../services/serverApi';
 import { fetchBook } from '../utils/openlibrary';
 
@@ -73,10 +78,9 @@ watch(() => props.bookData, async () => {
 
 const Book = ref(null);  
 const dialogIsVisible = ref(false);
-const showBookInfo = async () => {
-    console.log("fetching")
-    Book.value = await fetchBook(props.bookData.olid);      
+const showBookInfo = async () => {  
     dialogIsVisible.value = true;
+    Book.value = await fetchBook(props.bookData.olid); 
 }
 
 </script>
@@ -150,6 +154,7 @@ const showBookInfo = async () => {
     visibility: visible;
 }
 
+
 .dialog-container {
     display: flex;
     justify-content: space-between;
@@ -165,6 +170,16 @@ const showBookInfo = async () => {
     width: 200px;
     position: fixed;
 }
+.dialog-side-content img {
+    width: 100%;
+}
+.author-info {
+    margin-top: 10px;
+}
+.dialog-main {
+    flex-grow: 1;
+}
+
 
 
 </style>
