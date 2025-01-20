@@ -16,8 +16,9 @@
                 <p>No books found.</p>
             </template>
             <template v-else>
-                <Book v-for="book in books" :list-id="list.id" :olid="book.olid" :title="book.title" :subtitle="book.subtitle"
-                    :author-names="book.authors" :publish-year="book.publish_year" :cover-uri="book.cover_uri" :review="book.review" />
+                <Book v-for="book in books" :list-id="list.id" :olid="book.olid" :title="book.title"
+                    :subtitle="book.subtitle" :author-names="book.authors" :publish-year="book.publish_year"
+                    :cover-uri="book.cover_uri" :review="book.review" />
             </template>
 
             <!--
@@ -48,7 +49,6 @@
 </template>
 
 <script setup>
-const loggedInUserId = 1;
 
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -60,6 +60,10 @@ const route = useRoute();
 
 const isDialogVisible = ref(false)
 
+const user = JSON.parse(localStorage.getItem("user"))
+const loggedInUserId = user?.id;
+
+console.log("USER: ", user?.id)
 
 const groqApiKey = import.meta.env.VITE_GROQ_API_KEY;
 const groqApiUrl = import.meta.env.VITE_GROQ_API_URL;
@@ -86,8 +90,9 @@ const loadingBooks = ref(true); // Označava da se knjige trenutno dohvaćaju
 
 const hash = computed(() => route.hash.slice(1));
 
-watch (hash, async () => {
+watch(hash, async () => {
 
+    loadingBooks.value = true;
     lists.value = await getUserLists(loggedInUserId);
 
     if (lists.value.length) { // Provjeri da `lists` nije prazan
@@ -96,7 +101,6 @@ watch (hash, async () => {
         );
         console.log("Nađena lista: ", list.value);
         books.value = [];
-        loadingBooks.value = true;
 
         if (list.value) {
             bookIds.value = list.value.booksOlid
@@ -107,15 +111,16 @@ watch (hash, async () => {
             try {
                 books.value = await fetchBooksByOLID(bookIds.value);
                 console.log("Dohvaćene knjige: ", books.value);
-                loadingBooks.value = false;
+
 
             } catch (error) {
                 console.error("Greška kod dohvaćanja knjiga: ", error);
             }
         }
     }
+    loadingBooks.value = false;
 },
-{ immediate: true })
+    { immediate: true })
 
 </script>
 
